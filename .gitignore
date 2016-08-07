@@ -1,0 +1,104 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# vim swp file
+*~
+*.sw?
+# log dir
+stat/log
+
+# backup dir
+.backups/
+# debug log file
+nohup.out
+
+# test case
+testing/
+
+# C extensions
+*.so
+
+.directory
+
+*.pem
+
+*.pyc
+
+
+# Distribution / packaging
+.Python
+env/
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+server.conf
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Rope
+.ropeproject
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+
+# Sphinx documentation
+docs/_build/
+
+/server.conf
+
+# html
+**/.idea
+/server.conf.bak
+/.settings/org.eclipse.core.resources.prefs
+/test
+/model/quest_bak.py
+/model/quest_bak2.py
+/stat/__init__.py
+
+# mac
+.DS_Store
+.idea
+
+# script
+/script/pay/lenovo/*.conf
+/script/pay/script_pay.log*
+/script/tools/*.log
+/script/tools/*.log.*
+
+#sass cache
+**/.sass-cache
+**/.sass-cache/*
+
+**/node_modules
+**/node_modules/*
+/media/*
