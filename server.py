@@ -7,11 +7,11 @@ import asyncio
 from gevent import monkey
 from decouple import config
 
-from endpoint import part_1, login, version
+from endpoint import part_1, login, version, msg_list
 
 @hug.extend_api()
 def with_other_apis():
-    return [part_1, login, version]
+    return [part_1, login, version, msg_list]
 
 DEBUG = config('DEBUG')
 

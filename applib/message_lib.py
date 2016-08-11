@@ -16,8 +16,13 @@ class MessageLib(object):
     @staticmethod
     @cache.cache()
     def get_id_list(last_msg_id, uid):
+        sql_par = [uid]
+        sql = "SELECT id FROM o_user_msg_00 WHERE uid = %s ORDER BY id DESC LIMIT 10;"
+        if last_msg_id > 0:
+            sql = "SELECT id FROM o_user_msg_00 WHERE id < %s AND uid = %s ORDER BY id DESC LIMIT 10;"
+            sql_par.insert(0, last_msg_id)
         m = tools.mysql_conn()
-        m.Q("SELECT id FROM o_user_msg_00 WHERE id < %s AND uid = %s;", (last_msg_id, uid))  # 参数绑定防止sql注入
+        m.Q(sql, tuple(sql_par))  # 参数绑定防止sql注入
         res = m.fetch_all()
         return [item['id'] for item in res] if res else None
 

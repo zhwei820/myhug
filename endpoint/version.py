@@ -6,7 +6,7 @@ from falcon import HTTP_400
 from lib.tools import tools
 from lib import redisManager
 from lib.logger import info, error
-from applib.userLib import UserManager
+from applib.user_lib import UserManager
 
 @hug.get('/version.do', examples='os_type=ios&app_version=1.1.0.0&uid=10000001&ticket=hdfkdshjkbdfhsdkfhd&rs=mb&channel=share&package_name=com.test.package')
 async def version(request, os_type: types.text, app_version: types.text, uid: int, ticket: types.text, rs: types.text, channel: types.text, package_name: types.text):

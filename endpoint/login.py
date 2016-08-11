@@ -7,7 +7,7 @@ from falcon import HTTP_400
 from lib.tools import tools
 from lib.logger import info, error
 from lib import redisManager
-from applib.userLib import UserManager
+from applib.user_lib import UserManager
 
 
 @hug.post('/login')
