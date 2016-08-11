@@ -5,7 +5,7 @@ if __name__ == '__main__':
     par_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
     sys.path.append(par_dir)
 
-from lib.rc import Cache
+from lib.rc import cache
 from lib.tools import tools
 from lib import redisManager
 from lib.logger import info, error
@@ -17,15 +17,15 @@ class MessageLib(object):
     @cache.cache()
     def get_id_list(last_msg_id, uid):
         m = tools.mysql_conn()
-        m.Q("SELECT id FROM o_user_message_00 WHERE id < %s AND uid = %s;", last_msg_id, uid)  # 参数绑定防止sql注入
+        m.Q("SELECT id FROM o_user_msg_00 WHERE id < %s AND uid = %s;", (last_msg_id, uid))  # 参数绑定防止sql注入
         res = m.fetch_all()
-        return [item[0] for item in res] if res else None
+        return [item['id'] for item in res] if res else None
 
     @staticmethod
     @cache.cache()
     def get_msg_by_id(id):
         m = tools.mysql_conn()
-        m.Q("SELECT id, uid, info_title, info_subtitle, content, share_msg, info_time, info_type, info_notify, status, end_time, click_url, button_text, url_images, share_url, category, icon, pid, package_name FROM o_user_message_00 WHERE id = %s;", id)  # 参数绑定防止sql注入
+        m.Q("SELECT id, uid, info_title, info_subtitle, content, share_msg, info_time, info_type, info_notify, status, end_time, click_url, button_text, url_images, share_url, category, icon, pid, package_name FROM o_user_msg_00 WHERE id = %s;", (id, ))  # 参数绑定防止sql注入
         res = m.fetch_one()
         return res
 
