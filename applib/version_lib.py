@@ -36,9 +36,17 @@ class VersionLib(object):
 
     @staticmethod
     @cache.cache()
+    def get_update_is_force(os_type, app_version):
+        m = tools.mysql_conn()
+        m.Q("SELECT update_is_force FROM o_version WHERE os_type = %s and app_version = %s;", (os_type, app_version))  # 参数绑定防止sql注入
+        res = m.fetch_one()
+        return True if (res and res['update_is_force']) else False
+
     def get_version(os_type, app_version, uid_ext):
         version_id = VersionLib.get_version_id(os_type, app_version, uid_ext)
         if version_id:
-            return VersionLib.get_version_by_id(version_id)
+            version = VersionLib.get_version_by_id(version_id)
+            version['update_is_force'] = VersionLib.get_update_is_force(os_type, app_version)
+            return version
         else:
             return None
