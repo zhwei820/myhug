@@ -21,7 +21,7 @@ class MessageLib(object):
         if last_msg_id > 0:
             sql = "SELECT id FROM o_user_msg_00 WHERE id < %s AND uid = %s ORDER BY id DESC LIMIT 10;"
             sql_par.insert(0, last_msg_id)
-        m = tools.mysql_conn()
+        m = tools.mysql_conn('r')
         m.Q(sql, tuple(sql_par))  # 参数绑定防止sql注入
         res = m.fetch_all()
         return [item['id'] for item in res] if res else None
@@ -29,7 +29,7 @@ class MessageLib(object):
     @staticmethod
     @cache.cache()
     def get_msg_by_id(id):
-        m = tools.mysql_conn()
+        m = tools.mysql_conn('r')
         m.Q("SELECT id, uid, info_title, info_subtitle, content, share_msg, info_time, info_type, info_notify, status, end_time, click_url, button_text, url_images, share_url, category, icon, pid, package_name FROM o_user_msg_00 WHERE id = %s;", (id, ))  # 参数绑定防止sql注入
         res = m.fetch_one()
         return res

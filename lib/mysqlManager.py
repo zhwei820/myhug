@@ -32,19 +32,14 @@ class Mysql:
             # 主库 读写
             if not self.db_name:
                 dbConf = dj_database_url.config(default = config('DATABASE_URL', default='mysql://root:spwx@localhost:3306/pinax_mysite'))
-                self.db = MySQLdb.Connect(host=dbConf['HOST'], user=dbConf['USER'],
-                                          passwd=dbConf['PASSWORD'], port=int(dbConf['PORT']),
-                                          db=dbConf['NAME'], charset=self.default_charset,
-                                          cursorclass=MySQLdb.cursors.DictCursor)
-                self.db.autocommit(self.auto_commit)
-                self.cur = self.db.cursor()
             if self.db_name:
-                self.db = MySQLdb.Connect(host=_options.DATABASES[db_name]['HOST'], user=_options.DATABASES[db_name]['USER'],
-                                          passwd=_options.DATABASES[db_name]['PASSWORD'], port=int(_options.DATABASES[db_name]['PORT']),
-                                          db=_options.DATABASES[db_name]['NAME'], charset=self.default_charset,
-                                          cursorclass=MySQLdb.cursors.DictCursor)
-                self.db.autocommit(self.auto_commit)
-                self.cur = self.db.cursor()
+                dbConf = dj_database_url.config(default = config('DATABASE_URL_' + db_name, default='mysql://root:spwx@localhost:3306/pinax_mysite'))
+            self.db = MySQLdb.Connect(host=dbConf['HOST'], user=dbConf['USER'],
+                                      passwd=dbConf['PASSWORD'], port=int(dbConf['PORT']),
+                                      db=dbConf['NAME'], charset=self.default_charset,
+                                      cursorclass=MySQLdb.cursors.DictCursor)
+            self.db.autocommit(self.auto_commit)
+            self.cur = self.db.cursor()
         elif auto_commit != self.auto_commit:
             self.auto_commit = auto_commit
             self.db.autocommit(auto_commit)

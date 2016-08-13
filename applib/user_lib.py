@@ -50,7 +50,7 @@ class UserManager(object):
         if ret:
             ret_msg = u'%s已注册，请直接登陆' % UserManager.REG_SOURCE_DESC.get(reg_source, u'')
         else:
-            m = handler.mysql_conn()
+            m = handler.mysql_conn('r')
             m_score = None
             reg_lck = '_lck_reg_%s' % reg_qid
             r = handler.get_redis()
@@ -64,7 +64,7 @@ class UserManager(object):
                         m.TQ(sql, args)
                         uid = m.db.insert_id()
                         assert uid
-                        m_score = handler.mysql_conn()
+                        m_score = handler.mysql_conn('r')
                         if reg_source == 'mb':  # 手机号注册，昵称默认为139*****888这种（隐藏中间5位）
                             nickname = '%s*****%s' % (str(reg_qid)[:3], str(reg_qid)[-3:])
                         nickname = nickname.strip()  # 有一些用户名前后有空格或空行，处理一下

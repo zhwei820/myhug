@@ -52,7 +52,7 @@ async def get_channel(channel):
     res = tools.get_obj_cache(r_key)
     if res:
         return res
-    m = tools.mysql_conn()
+    m = tools.mysql_conn('r')
     m.Q("SELECT id, channel, parent_id, remark, ctime, channel_type FROM a_channel_set WHERE status = 1 AND channel like '%s' limit 1;" % (channel + '%'))  # 参数绑定防止sql注入
     res = m.fetch_one()
     ret = {"data": res, "code": 0}
@@ -70,7 +70,7 @@ async def get_channel_list():
     res = tools.get_obj_cache(r_key)
     if res:
         return res
-    m = tools.mysql_conn()
+    m = tools.mysql_conn('r')
     m.Q("SELECT id, channel, parent_id, remark, ctime, channel_type FROM a_channel_set WHERE status = 1;")  # 参数绑定防止sql注入
     res = m.fetch_all()
     ret = {"data": res, "code": 0}
