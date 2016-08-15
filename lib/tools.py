@@ -6,15 +6,18 @@ if __name__ == '__main__':
     import os
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
+import asyncio
+import aiohttp
+
 import json
 import traceback
 import hashlib
 import datetime
 import sys
 import os
-from lib.redisManager import Redis
-from lib.mysqlManager import Mysql
-from lib.jsonEncoder import CJsonEncoder
+from lib.redis_manager import Redis
+from lib.mysql_manager import Mysql
+from lib.json_encoder import CJsonEncoder
 
 class Tools(object):
     def __init__(self):
@@ -35,20 +38,65 @@ class Tools(object):
         return hashlib.md5(password + 'dianABCDEF12').hexdigest()
 
 
-    #计数器功能升级版
-    def get_counting_super(self, key, interval, default_cooltime=1, onmonth=0, db=''):
-        keystr = self.temp_cache_key(key)
-        return self.get_counting(keystr, interval, default_cooltime, onmonth, db)
+    def temp_cache_key(self, key):
+        return "_ZHUAN_%s%s" % (self.__class__.__name__, key)
 
-    def del_counting(self, key, onmonth=0, db=''):
-        u'''删除 ``get_counting(...)``` 创建的计数器
-        '''
-        today = str(datetime.date.today()) if not onmonth else str(datetime.date.today())[:7]
-        r_cool_key = key + "_" + today
-        r = Redis.get_instance(db)
-        r.delete(r_cool_key)
+    def get_counting(self, key, interval, host_name=''):
+        r = self.get_redis(host_name)
+        r_key = self.temp_cache_key(key)
+        rs = r.get(r_key)
+        if rs:
+            return False
+        else:
+            rs = r.settex(r_key, 1, interval)
+            return True
+
+    def del_counting(self, key, host_name=''):
+        r = self.get_redis(host_name)
+        r_key = self.temp_cache_key(key)
+        r.delete(r_key)
+
+    def response(self, rs = None, code = 0, message = ''):
+        if not rs:
+            return {"code": code, "message": message}
+        elif isinstance(rs, dict):
+            rs.update({"code": code, "message": message})
+            return rs
+        else:
+
+            return {"code": code, "message": message, "data": rs}
 
 tools = Tools()
 
+
+async def fetch(url):
+    try:
+        with aiohttp.ClientSession() as client:
+            async with client.get(url) as resp:
+                return await resp.text()
+    except Exception as e:
+        return None
+
+async def http_post(url, data=None):
+    try:
+        with aiohttp.ClientSession() as client:
+            async with client.post(url, data=data) as resp:
+                return await resp.text()
+    except Exception as e:
+        return None
+
+async def http_put(url, data=None):
+    try:
+        with aiohttp.ClientSession() as client:
+            async with client.put(url, data=data) as resp:
+                return await resp.text()
+    except Exception as e:
+        return None
+
+
 if __name__ == '__main__':
     s = Tools()
+    loop = asyncio.get_event_loop()
+    print(loop.run_until_complete(fetch('http://atanx.alicdn.com/t/tanxssp.js?_v=12')))
+    print(loop.run_until_complete(http_post('http://atanx.alicdn.com/t/tanxssp.js?_v=12')))
+    print(loop.run_until_complete(http_put('http://atanx.alicdn.com/t/tanxssp.js?_v=12')))

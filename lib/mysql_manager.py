@@ -26,7 +26,7 @@ class Mysql:
         self.db = None
         self.cur = None
 
-    def get_conn(self, auto_commit=True):
+    def get_conn(self, db_name='', auto_commit=True):
         if self.db is None:
             self.auto_commit = auto_commit
             # 主库 读写

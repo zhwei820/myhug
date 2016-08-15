@@ -3,8 +3,8 @@
 import hug
 from hug import types
 from falcon import HTTP_400
+import lib.err_code
 from lib.tools import tools
-from lib import redisManager
 from lib.logger import info, error
 from applib.version_lib import VersionLib
 
@@ -14,5 +14,4 @@ async def version(request, os_type: types.text, app_version: types.text, uid: in
     rs : reg_resource  mb, wb, qq, wx ... etc
     ticket : 用户验证串
     """
-    res = VersionLib.get_version(os_type, app_version, str(uid)[-2:])
-    return res
+    return tools.response(VersionLib.get_version(os_type, app_version, str(uid)[-2:]))

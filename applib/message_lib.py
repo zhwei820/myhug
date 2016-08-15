@@ -7,7 +7,6 @@ if __name__ == '__main__':
 
 from lib.rc import cache
 from lib.tools import tools
-from lib import redisManager
 from lib.logger import info, error
 
 class MessageLib(object):
