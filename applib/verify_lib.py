@@ -44,7 +44,7 @@ class VerifyLib():
     @staticmethod
     def send_code(pnum, code, package_name):
         msg = '验证码：%s。为了您的帐号安全，验证码请勿转发给他人' % code
-        channel = config('verify_sms_channel', default='100').get('')
+        channel = config('verify_sms_channel', default='100').get(package_name, '100')
         sign = '【红包锁屏】'
         data = json.dumps({'mno': str(pnum),  # 目标手机号
                            'channel': channel,  # 渠道号
@@ -53,9 +53,9 @@ class VerifyLib():
                            'ip': client_ip,  # 目标ip
                            'sign': sign,  # 短信签名
                            })
-        urlstr = 'http://rest.yxpopo.com/message_center/voice_verify/send' if validate_type == 1 else 'http://rest.yxpopo.com/message_center/sms/send'
-        http_client = httpclient.HTTPClient() if _options.debug else httpclient.AsyncHTTPClient()
-        response = yield gen.Task(http_client.fetch, urlstr, method='PUT', body=data)
+        url = config('sms_url', default='http://rest.yxpopo.com/message_center/voice_verify/send').get(package_name, '100')
+        http_client = httpclient.AsyncHTTPClient()
+        response = yield gen.Task(http_client.fetch, url, method='PUT', body=data)
         rs = None
         try:
             rs = json.loads(response.body)
