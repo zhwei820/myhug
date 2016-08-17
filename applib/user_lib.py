@@ -1,15 +1,18 @@
 # coding=utf-8
+import jwt
+import traceback
 from decouple import config
-
+from lib.rc import cache
+from lib.tools import tools, http_put
+from lib.logger import info, error
 
 class UserManager(object):
-    """docstring for UserManager"""
     def __init__(self, arg):
         super(UserManager, self).__init__()
         self.arg = arg
 
     @staticmethod
-    def addUser(handler, user_obj):
+    def add_user(obj):
         u'''
         **args**
          * `reg_qid` 注册id 即微信/qq/微博的openid或者手机号
@@ -34,50 +37,51 @@ class UserManager(object):
 
         '''
         ret_uid, ret_ticket, ret_msg = None, None, ''
-        reg_qid, token, reg_source, invite_uid, ip, os_type, app_version, channel = user_obj['reg_qid'], user_obj['token'], user_obj['reg_source'], user_obj['invite_uid'], user_obj['ip'], user_obj['os_type'], user_obj['app_version'], user_obj['channel']
-        # usc = handler.user_service_conn()
+        # usc = tools.user_service_conn()
         # 检查邀请人
         # if invite_uid:
-        #     ret = yield usc.checkUserByUid(handler, invite_uid)
+        #     ret = yield usc.checkUserByUid(tools, invite_uid)
         #     if not ret:
         #         info('邀请人无效 %s', invite_uid)
         #         invite_uid = '0'
         # else:
         #     invite_uid = '0'
         # 检查是否已注册
-        # ret = yield usc.getUidByQid(handler, reg_qid, reg_source)
+        # ret = yield usc.getUidByQid(tools, reg_qid, reg_source)
         ret = False
         if ret:
             ret_msg = u'%s已注册，请直接登陆' % UserManager.REG_SOURCE_DESC.get(reg_source, u'')
         else:
-            m = handler.mysql_conn('r')
+            m = tools.mysql_conn()
             m_score = None
-            reg_lck = '_lck_reg_%s' % reg_qid
-            r = handler.get_redis()
+            reg_lck = '_lck_reg_%s' % obj['reg_qid']
+            r = tools.get_redis()
             if r.incr(reg_lck) == 1:
                 r.expire(reg_lck, 30)
                 try:
                     try:
-                        sql = "INSERT INTO o_user_basic(ctime, channel, os_type, app_version, reg_ip, invite_uid, reg_source, reg_qid, status) " \
-                              "VALUES(NOW(), %s, %s, %s, %s, %s, %s, %s, %s)"
-                        args = (channel, os_type, app_version, ip, invite_uid, reg_source, reg_qid, 1)
+                        sql = "INSERT INTO o_user_basic(ctime, channel, os_type, app_version, package_name, reg_ip, invite_uid, reg_source, reg_qid, status, ) " \
+                              "VALUES(NOW(), %s, %s, %s, %s, %s, %s, %s, %s, 1)"
+                        args = (obj['channel'], obj['os_type'], obj['app_version'], obj['package_name'], obj['reg_ip'], obj['invite_uid'], obj['reg_source'], obj['reg_qid'])
                         m.TQ(sql, args)
                         uid = m.db.insert_id()
                         assert uid
-                        m_score = handler.mysql_conn('r')
+                        m_score = tools.mysql_conn('d')
                         if reg_source == 'mb':  # 手机号注册，昵称默认为139*****888这种（隐藏中间5位）
-                            nickname = '%s*****%s' % (str(reg_qid)[:3], str(reg_qid)[-3:])
+                            nickname = '%s*****%s' % (str(obj['reg_qid'])[:3], str(obj['reg_qid'])[-3:])
                         nickname = nickname.strip()  # 有一些用户名前后有空格或空行，处理一下
-                        ticket = URLSafeTimedSerializer(config('token_secret_key'), config('token_salt_login')).dumps({'uid': uid, 'mobile': reg_qid})
+
+                        ticket = jwt.encode({'uid': uid, 'mobile': reg_qid}, config('token_secret_key'), algorithm='HS256')
                         sql = "INSERT INTO o_user_extra(uid, reg_source, reg_qid, token, ticket, nickname, gender, figure_url, figure_url_other, province, city, country, year) " \
                               "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-                        args = (uid, reg_source, reg_qid, token, ticket, nickname, gender, figure_url, figure_url_other, province, city, country, year or 0)
+                        args = (uid, obj['reg_source'], obj['reg_qid'], obj['token'], obj['reg_qid'], ticket, obj['nickname'], obj['gender'], obj['figure_url'], obj['figure_url_other'], obj['province'], obj['city'], obj['country'], obj['year'])
                         m.TQ(sql, args)
                         info('uid: %s, score_table: %s' % (uid, UserManager._whichScoreTbl(uid)))
                         m_score.TQ("INSERT INTO %s (uid, score) VALUES(%%s, %%s)" % UserManager._whichScoreTbl(uid), (uid, 0))
                         m.db.commit()
                         m_score.db.commit()
                     except:
+                        traceback.print_exc()
                         ret_msg = u'数据库错误'
                         try:
                             m.db.rollback()
@@ -97,7 +101,7 @@ class UserManager(object):
                         #     if invite_uid:
                         #         RabbitMqLib().send_msg('task_queue', {'method': 'doQuest', 'args': {'questId': QuestManager.QUEST_TUZI_INVITE, 'uid': invite_uid, 'ulevel': 0}})  # 完成师徒邀请
                         #         info('用户完成徒弟邀请任务. uid %s , quest_id : %s, 被邀请人uid : %s' % (invite_uid, QuestManager.QUEST_TUZI_INVITE, uid))
-                        #         userInfo = yield UserManager.getUserInfoByUid(handler, invite_uid)
+                        #         userInfo = yield UserManager.getUserInfoByUid(tools, invite_uid)
                         #         if userInfo and userInfo['invite_uid']:
                         #             RabbitMqLib().send_msg('task_queue', {'method': 'doQuest', 'args': {'questId': QuestManager.QUEST_TUSUN_INVITE, 'uid': userInfo['invite_uid'], 'ulevel': -1}})  # 完成徒孙邀请
                         #             info('用户完成徒孙邀请任务. uid %s , quest_id : %s' % (userInfo['invite_uid'], QuestManager.QUEST_TUSUN_INVITE))

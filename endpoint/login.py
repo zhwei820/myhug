@@ -10,18 +10,42 @@ from lib.redis_manager import Redis
 from applib.user_lib import UserManager
 
 
-@hug.post('/login')
-def regster(request, openid: types.text, access_token: types.text, reg_source: types.text, invite_uid: int, os_type: types.text, app_version: types.text, channel: types.text):
+@hug.post('/login', examples='openid=15810538008&os_type=ios&app_version=1.1.0.0&rs=mb&access_token=10000dkjdksjfkds&channel=share&package_name=com.test.package&invite_uid=10000000&gender=m')
+def regster(request, openid: types.text,
+            access_token: types.text,
+            rs: types.text,
+            invite_uid: int,
+            os_type: types.text,
+            app_version: types.text,
+            channel: types.text,
+            package_name: types.text,
+            nickname: types.text = '',
+            gender: types.text = '',
+            figure_url: types.text = '',
+            figure_url_other: types.text = '',
+            province: types.text = '',
+            city: types.text = '',
+            country: types.text = '',
+            year: types.text = ''):
     ip = request.remote_addr
-    uid, ticket, err_msg = UserManager.addUser(tools, {
+    uid, ticket, err_msg = UserManager.add_user({
         'reg_qid': openid,
         'token': access_token,
-        'reg_source': reg_source,
+        'reg_source': rs,
         'invite_uid': invite_uid,
-        'ip': ip,
+        'reg_ip': ip,
         'os_type': os_type,
         'app_version': app_version,
-        'channel': channel
+        'channel': channel,
+        'package_name': package_name,
+        'nickname': nickname,
+        'gender': gender,
+        'figure_url': figure_url,
+        'figure_url_other': figure_url_other,
+        'province': province,
+        'city': city,
+        'country': country,
+        'year': year,
         })
     return {"uid": uid, "ticket": ticket, "message": err_msg, "code": 0}
 
