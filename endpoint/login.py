@@ -28,7 +28,7 @@ def regster(request, openid: types.text,
             country: types.text = '',
             year: types.text = ''):
     ip = request.remote_addr
-    uid, ticket, err_msg = UserManager.add_user({
+    ret = UserManager.add_user({
         'reg_qid': openid,
         'token': access_token,
         'reg_source': rs,
@@ -47,7 +47,7 @@ def regster(request, openid: types.text,
         'country': country,
         'year': year,
         })
-    return {"uid": uid, "ticket": ticket, "message": err_msg, "code": 0}
+    return tools.response(ret)
 
 @hug.get()
 def quick(response):

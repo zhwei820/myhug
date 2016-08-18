@@ -85,7 +85,7 @@ class Mysql:
     # 事物需要TQ支持 而不是Q
     def TQ(self, sql, args=None):
         try:
-            self.get_conn(False)
+            self.get_conn(auto_commit=False)
             rs = self.cur.execute(sql, args)
             return rs
         except MySQLdb.Error as e:

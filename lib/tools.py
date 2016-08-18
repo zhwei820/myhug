@@ -57,14 +57,15 @@ class Tools(object):
         r.delete(r_key)
 
     def response(self, rs = None, code = 0, message = ''):
+        rsp = {"code": code, "message": message}
         if not rs:
-            return {"code": code, "message": message}
+            return rsp
         elif isinstance(rs, dict):
-            rs.update({"code": code, "message": message})
-            return rs
+            rsp.update(rs)
+            return rsp
         else:
-
-            return {"code": code, "message": message, "data": rs}
+            rsp['data'] = rs
+            return rsp
 
 tools = Tools()
 
