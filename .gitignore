@@ -80,7 +80,6 @@ docs/_build/
 **/.idea
 /server.conf.bak
 /.settings/org.eclipse.core.resources.prefs
-/test
 /model/quest_bak.py
 /model/quest_bak2.py
 /stat/__init__.py
