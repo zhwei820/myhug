@@ -4,3 +4,4 @@ git+https://github.com/zhwei820/dj-database-url.git
 ConcurrentLogHandler
 git+https://github.com/zhwei820/rc.git
 aiohttp
+pyjwt

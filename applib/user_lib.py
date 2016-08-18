@@ -60,21 +60,21 @@ class UserManager(object):
                 r.expire(reg_lck, 30)
                 try:
                     try:
-                        sql = "INSERT INTO o_user_basic(ctime, channel, os_type, app_version, package_name, reg_ip, invite_uid, reg_source, reg_qid, status, ) " \
+                        sql = "INSERT INTO o_user_basic(ctime, channel, os_type, app_version, package_name, reg_ip, invite_uid, reg_source, reg_qid, status) " \
                               "VALUES(NOW(), %s, %s, %s, %s, %s, %s, %s, %s, 1)"
                         args = (obj['channel'], obj['os_type'], obj['app_version'], obj['package_name'], obj['reg_ip'], obj['invite_uid'], obj['reg_source'], obj['reg_qid'])
                         m.TQ(sql, args)
                         uid = m.db.insert_id()
                         assert uid
                         m_score = tools.mysql_conn('d')
-                        if reg_source == 'mb':  # 手机号注册，昵称默认为139*****888这种（隐藏中间5位）
-                            nickname = '%s*****%s' % (str(obj['reg_qid'])[:3], str(obj['reg_qid'])[-3:])
-                        nickname = nickname.strip()  # 有一些用户名前后有空格或空行，处理一下
+                        if obj['reg_source'] == 'mb':  # 手机号注册，昵称默认为139*****888这种（隐藏中间5位）
+                            obj['nickname'] = '%s*****%s' % (str(obj['reg_qid'])[:3], str(obj['reg_qid'])[-3:])
+                        obj['nickname'] = obj['nickname'].strip()  # 有一些用户名前后有空格或空行，处理一下
 
-                        ticket = jwt.encode({'uid': uid, 'mobile': reg_qid}, config('token_secret_key'), algorithm='HS256')
+                        ticket = jwt.encode({'uid': uid, 'mobile': obj['reg_qid']}, config('token_secret_key'), algorithm='HS256')
                         sql = "INSERT INTO o_user_extra(uid, reg_source, reg_qid, token, ticket, nickname, gender, figure_url, figure_url_other, province, city, country, year) " \
                               "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-                        args = (uid, obj['reg_source'], obj['reg_qid'], obj['token'], obj['reg_qid'], ticket, obj['nickname'], obj['gender'], obj['figure_url'], obj['figure_url_other'], obj['province'], obj['city'], obj['country'], obj['year'])
+                        args = (uid, obj['reg_source'], obj['reg_qid'], obj['token'], ticket, obj['nickname'], obj['gender'], obj['figure_url'], obj['figure_url_other'], obj['province'], obj['city'], obj['country'], obj['year'])
                         m.TQ(sql, args)
                         info('uid: %s, score_table: %s' % (uid, UserManager._whichScoreTbl(uid)))
                         m_score.TQ("INSERT INTO %s (uid, score) VALUES(%%s, %%s)" % UserManager._whichScoreTbl(uid), (uid, 0))

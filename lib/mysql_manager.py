@@ -14,6 +14,7 @@ import traceback
 import MySQLdb.cursors
 from decouple import config
 import dj_database_url
+from lib.logger import info, error
 
 class Mysql:
 
