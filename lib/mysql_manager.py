@@ -112,6 +112,12 @@ class Mysql:
     def fetch_all(self):
         return self.cur.fetchall()
 
+    def fetchone(self):
+        return self.cur.fetchone()
+
+    def fetchall(self):
+        return self.cur.fetchall()
+
     def executemany(self, sql, args):
         u'''批量执行多sql语句
         '''

@@ -3,7 +3,7 @@
 import hug
 from hug import types
 from falcon import HTTP_400
-import lib.err_code
+import lib.err_code as err_code
 from lib.tools import tools
 from lib.logger import info, error
 from applib.sms_verify import VerifyLib

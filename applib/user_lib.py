@@ -5,6 +5,7 @@ from decouple import config
 from lib.rc import cache
 from lib.tools import tools, http_put
 from lib.logger import info, error
+import lib.err_code as err_code
 
 class UserManager(object):
     # reg_source 取值
@@ -68,14 +69,14 @@ class UserManager(object):
         ret = {'uid': None, 'ticket': None, 'message': '', 'code': 0}
         # 检查邀请人
         if obj['invite_uid']:
-            res = yield UserManager.check_user_by_uid(obj['invite_uid'])
+            res = UserManager.check_user_by_uid(obj['invite_uid'])
             if not res:
                 info('邀请人无效 %s', obj['invite_uid'])
                 obj['invite_uid'] = '0'
         else:
             obj['invite_uid'] = '0'
         # 检查是否已注册
-        res = yield UserManager.get_uid_by_qid(obj['reg_qid'], obj['reg_source'])
+        res = UserManager.get_uid_by_qid(obj['reg_qid'], obj['reg_source'])
         if res:
             ret['message'] = '%s已注册，请直接登陆' % UserManager.REG_SOURCE_DESC.get(obj['reg_source'], '')
             ret['code'] = err_code._ERR_ALREADY_REGISTERED
@@ -131,7 +132,7 @@ class UserManager(object):
         #     if invite_uid:
         #         RabbitMqLib().send_msg('task_queue', {'method': 'doQuest', 'args': {'questId': QuestManager.QUEST_TUZI_INVITE, 'uid': invite_uid, 'ulevel': 0}})  # 完成师徒邀请
         #         info('用户完成徒弟邀请任务. uid %s , quest_id : %s, 被邀请人uid : %s' % (invite_uid, QuestManager.QUEST_TUZI_INVITE, uid))
-        #         userInfo = yield UserManager.getUserInfoByUid(invite_uid)
+        #         userInfo = UserManager.getUserInfoByUid(invite_uid)
         #         if userInfo and userInfo['invite_uid']:
         #             RabbitMqLib().send_msg('task_queue', {'method': 'doQuest', 'args': {'questId': QuestManager.QUEST_TUSUN_INVITE, 'uid': userInfo['invite_uid'], 'ulevel': -1}})  # 完成徒孙邀请
         #             info('用户完成徒孙邀请任务. uid %s , quest_id : %s' % (userInfo['invite_uid'], QuestManager.QUEST_TUSUN_INVITE))
@@ -149,11 +150,11 @@ class UserManager(object):
         '''
         ret = False
         m = tools.mysql_conn()
-        yield m.SQ("SELECT uid FROM o_user_basic WHERE uid = %s ", (uid,))
+        m.Q("SELECT uid FROM o_user_basic WHERE uid = %s ", (uid,))
         rs = m.fetchone()
         if rs:
             ret = True
-        raise gen.Return(ret)
+        return ret
 
     @staticmethod
     def get_uid_by_qid(qid, reg_source=None):
@@ -172,11 +173,11 @@ class UserManager(object):
         else:
             sql = "SELECT uid FROM o_user_basic WHERE reg_qid=%s "
             args = (qid, )
-        yield m.SQ(sql, args)
+        m.Q(sql, args)
         rs = m.fetchone()
         if rs:
-            ret = rs[0]
-        raise gen.Return(ret)
+            ret = rs['uid']
+        return ret
 
     @staticmethod
     def get_uid_by_bind_mobile(bind_mobile, reg_source=None):
@@ -188,11 +189,11 @@ class UserManager(object):
         else:
             sql = "SELECT uid FROM o_user_basic WHERE bind_mobile = %s;"
             args = (bind_mobile, )
-        yield m.SQ(sql, args)
+        m.Q(sql, args)
         rs = m.fetchone()
-        if rs and rs[0]:
-            ret = rs[0]
-        raise gen.Return(ret)
+        if rs and rs['uid']:
+            ret = rs['uid']
+        return ret
 
     @staticmethod
     def get_qid_by_bind_mobile(bind_mobile, reg_source=None):
@@ -204,11 +205,11 @@ class UserManager(object):
         else:
             sql = "SELECT reg_qid FROM o_user_basic WHERE bind_mobile = %s;"
             args = (bind_mobile, )
-        yield m.SQ(sql, args)
+        m.Q(sql, args)
         rs = m.fetchone()
-        if rs and rs[0]:
-            ret = rs[0]
-        raise gen.Return(ret)
+        if rs and rs['reg_qid']:
+            ret = rs['reg_qid']
+        return ret
 
 
     @staticmethod
