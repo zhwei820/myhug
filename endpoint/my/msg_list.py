@@ -4,6 +4,7 @@ import hug
 from hug import types
 from falcon import HTTP_400
 from lib.tools import tools
+from lib.auth import token_authorization
 from lib.logger import info, error
 from applib.user_lib import UserManager
 from applib.message_lib import MessageLib
@@ -12,7 +13,12 @@ from applib.message_lib import MessageLib
 def message_list(request, last_msg_id: int, os_type: types.text, app_version: types.text, channel: types.text, package_name: types.text = 'com.test.package', uid: int  = -1):
     """获取消息列表
     """
-    if uid <= 0 and token_authorization() is False:
+    if uid <= 0 and token_authorization(request) is False:
+        print('dfd')
         return tools.response(MessageLib.get_msg_list(last_msg_id))
-    elif uid and token_authorization():
+    elif uid and token_authorization(request):
+        print('dfdbbbbbvvv')
+
         return tools.response(MessageLib.get_msg_list(last_msg_id, uid))
+
+    print('hhhhhhhhh')

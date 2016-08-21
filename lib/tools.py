@@ -37,7 +37,6 @@ class Tools(object):
     def get_password(self, password):
         return hashlib.md5(password + 'dianABCDEF12').hexdigest()
 
-
     def temp_cache_key(self, key):
         return "_ZHUAN_%s%s" % (self.__class__.__name__, key)
 
@@ -69,11 +68,10 @@ class Tools(object):
 
 tools = Tools()
 
-
-async def fetch(url):
+async def fetch(url, headers = None):
     try:
         with aiohttp.ClientSession() as client:
-            async with client.get(url) as resp:
+            async with client.get(url, headers=headers) as resp:
                 return await resp.text()
     except Exception as e:
         return None
