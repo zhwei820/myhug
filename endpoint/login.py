@@ -26,7 +26,7 @@ def regster(request, openid: types.text,
             province: types.text = '',
             city: types.text = '',
             country: types.text = '',
-            year: types.text = ''):
+            year: types.text = '1900'):
     ip = request.remote_addr
     ret = UserManager.add_user({
         'reg_qid': openid,
@@ -48,6 +48,7 @@ def regster(request, openid: types.text,
         'year': year,
         })
     return tools.response(ret)
+
 
 @hug.get()
 def quick(response):

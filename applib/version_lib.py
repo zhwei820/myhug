@@ -1,6 +1,6 @@
 # coding=utf-8
 import json
-from lib.rc import cache
+from lib.redis_cache import cache
 from lib.tools import tools
 from lib.logger import info, error
 

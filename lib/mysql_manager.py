@@ -7,11 +7,11 @@ mysql连接管理类
 
 @author: zh
 """
-import MySQLdb
+import pymysql
 import _mysql_exceptions
 import warnings
 import traceback
-import MySQLdb.cursors
+import pymysql.cursors
 from decouple import config
 import dj_database_url
 from lib.logger import info, error
@@ -35,10 +35,10 @@ class Mysql:
                 dbConf = dj_database_url.config(default = config('DATABASE_URL', default='mysql://root:spwx@localhost:3306/pinax_mysite'))
             if self.db_name:
                 dbConf = dj_database_url.config(default = config('DATABASE_URL_' + db_name, default='mysql://root:spwx@localhost:3306/pinax_mysite'))
-            self.db = MySQLdb.Connect(host=dbConf['HOST'], user=dbConf['USER'],
+            self.db = pymysql.Connect(host=dbConf['HOST'], user=dbConf['USER'],
                                       passwd=dbConf['PASSWORD'], port=int(dbConf['PORT']),
                                       db=dbConf['NAME'], charset=self.default_charset,
-                                      cursorclass=MySQLdb.cursors.DictCursor)
+                                      cursorclass=pymysql.cursors.DictCursor)
             self.db.autocommit(self.auto_commit)
             self.cur = self.db.cursor()
         elif auto_commit != self.auto_commit:
@@ -48,7 +48,7 @@ class Mysql:
     @staticmethod
     def F(sql):
         # 格式化字符串，避免sql攻击
-        return MySQLdb.escape_string(sql)
+        return pymysql.escape_string(sql)
 
     def SQ(self, sql, args=None):
         return self._query(sql, args)
@@ -88,12 +88,11 @@ class Mysql:
             self.get_conn(auto_commit=False)
             rs = self.cur.execute(sql, args)
             return rs
-        except MySQLdb.Error as e:
+        except pymysql.Error as e:
             error("_query error: %s %s", sql, args, exc_info=True)
             raise e
 
     def _query(self, sql, args=None):
-
         try:
             self.get_conn()
             with warnings.catch_warnings(record=True) as w:
@@ -102,7 +101,7 @@ class Mysql:
                 if w:
                     pass
             return rs
-        except MySQLdb.Error as e:
+        except pymysql.Error as e:
             e.args = (e.args, sql, args)
             raise e
 

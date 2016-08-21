@@ -2,9 +2,10 @@
 import jwt
 import traceback
 from decouple import config
-from lib.rc import cache
+from lib.redis_cache import cache
 from lib.tools import tools, http_put
 from lib.logger import info, error
+from lib.auth import get_new_ticket
 import lib.err_code as err_code
 
 class UserManager(object):
@@ -99,12 +100,12 @@ class UserManager(object):
                 obj['nickname'] = '%s*****%s' % (str(obj['reg_qid'])[:3], str(obj['reg_qid'])[-3:])
             obj['nickname'] = obj['nickname'].strip()  # 有一些用户名前后有空格或空行，处理一下
 
-            ticket = jwt.encode({'uid': uid, 'mobile': obj['reg_qid']}, config('token_secret_key'), algorithm='HS256')
+            ticket = get_new_ticket(uid, obj['reg_qid'], obj['reg_source'])
             sql = "INSERT INTO o_user_extra(uid, reg_source, reg_qid, token, ticket, nickname, gender, figure_url, figure_url_other, province, city, country, year) " \
                   "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
             args = (uid, obj['reg_source'], obj['reg_qid'], obj['token'], ticket, obj['nickname'], obj['gender'], obj['figure_url'], obj['figure_url_other'], obj['province'], obj['city'], obj['country'], obj['year'])
             m.TQ(sql, args)
-            info('uid: %s, score_table: %s' % (uid, UserManager._which_score_table(uid)))
+            # info('uid: %s, score_table: %s' % (uid, UserManager._which_score_table(uid)))
             m_score.TQ("INSERT INTO %s (uid, score) VALUES(%%s, %%s)" % UserManager._which_score_table(uid), (uid, 0))
             m.db.commit()
             m_score.db.commit()
