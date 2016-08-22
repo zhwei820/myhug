@@ -70,7 +70,11 @@ tools = Tools()
 
 async def fetch(url, headers = None):
     try:
-        with aiohttp.ClientSession() as client:
+        print(headers)
+        with aiohttp.ClientSession(headers=headers) as client:
+            headers = {'Authorization': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjEwMDYwOTEwLCJtb2JpbGUiOiIxNTgxMDUxMjEwNTEifQ.UihvxbnNutCpSZU0R0QynxPmkLRDV331F37hQAD9LCw'}
+            headers = {'content-type': 'text/html; charset=utf-8'}
+
             async with client.get(url, headers=headers) as resp:
                 return await resp.text()
     except Exception as e:
