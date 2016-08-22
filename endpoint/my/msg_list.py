@@ -13,7 +13,6 @@ from applib.message_lib import MessageLib
 def message_list(request, last_msg_id: int, os_type: types.text, app_version: types.text, channel: types.text, package_name: types.text = 'com.test.package', uid: int  = -1):
     """获取消息列表
     """
-    print(token_authorization(request))
     if uid <= 0 and token_authorization(request) is False:
         print('dfd')
         return tools.response(MessageLib.get_msg_list(last_msg_id))

@@ -14,7 +14,7 @@ from lib.tools import fetch
 def long_time_task(name):
     print('Run task %s (%s)...' % (name, os.getpid()))
     loop = asyncio.get_event_loop()
-    headers = {'Authorization': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjEwMDYwOTEwLCJtb2JpbGUiOiIxNTgxMDUxMjEwNTEifQ.UihvxbnNutCpSZU0R0QynxPmkLRDV331F37hQAD9LCw'}
+    headers = {'AUTHORIZATION': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjEwMDYwOTEwLCJtb2JpbGUiOiIxNTgxMDUxMjEwNTEifQ.UihvxbnNutCpSZU0R0QynxPmkLRDV331F37hQAD9LCw'}
     for x in range(0, 1):
         print(loop.run_until_complete(fetch('http://localhost:8000/msg_list.do?last_msg_id=-1&os_type=ios&app_version=1.1.0.0&uid=0&channel=share&package_name=com.test.package', headers = headers)))
     print('Task %s runs %0.2f seconds.' % (name, (end - start)))
