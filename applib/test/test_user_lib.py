@@ -26,10 +26,9 @@ def _test_add_user():
                                                     'year': 1988,
                                                     }))
 
-class TestUserLib(unittest.TestCase):
-    def test_add_user(self):
-        self.assertEqual(_test_add_user()['code'], 0)
+def test_add_user():
+    assert _test_add_user()['code'] == 0
 
-    def test_get_user_by_uid(self):
-        self.assertEqual(UserLib.get_user_info_by_uid(10000000)['uid'], 10000000)
-        self.assertIsNone(UserLib.get_user_info_by_uid(90000000))
+def test_get_user_by_uid():
+    assert UserLib.get_user_info_by_uid(10000000)['uid'] == 10000000
+    assert not UserLib.get_user_info_by_uid(90000000)

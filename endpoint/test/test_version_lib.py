@@ -1,5 +1,3 @@
-
-"""
 from base64 import b64encode
 
 import pytest
@@ -10,7 +8,6 @@ api = hug.API(__name__)
 
 # Fix flake8 undefined names (F821)
 __hug__ = __hug__  # noqa
-
 
 def test_timer():
     """Tests that the timer directive outputs the correct format, and automatically attaches itself to an API"""
