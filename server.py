@@ -24,4 +24,5 @@ if not DEBUG:
 # if __name__ == '__main__':
 monkey.patch_thread()
 # __hug__.serve()  # noqa
-app = hug.API(__name__).http.server()
+api = hug.API(__name__)
+app = api.http.server()
