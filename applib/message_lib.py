@@ -52,7 +52,6 @@ class MessageLib(object):
                     rs.append(MessageLib.get_pub_msg_by_id(msg_id))
             return rs
 
-
     @staticmethod
     @cache.cache()
     def get_pub_msg_list(last_msg_id):

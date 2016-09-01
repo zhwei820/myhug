@@ -26,7 +26,7 @@ from lib.applog import app_log
 info, debug, error = app_log.info, app_log.debug, app_log.error
 
 
-class UserManager(object):
+class UserLib(object):
     # reg_source 取值
     REG_SOURCE_DESC = {'wx': u'微信号',
                        'qq': u'QQ号',
@@ -159,7 +159,7 @@ class UserManager(object):
         score_info = handler.get_obj_cache(c_k)
         if not score_info:
             m = handler.mysql_conn()
-            sql = "SELECT uid, score, score_charge_hbb, score_charge_alipay, score_charge_weixin, score_consumption, score_cancel_consumption, score_withdraw, score_cancel_withdraw, score_predeposit, score_register, score_invite, score_task, score_active, score_field_1, score_field_2, score_field_3, score_field_4, score_field_5 FROM %s WHERE uid = %s;" % (UserManager._whichScoreTbl(uid), uid)
+            sql = "SELECT uid, score, score_charge_hbb, score_charge_alipay, score_charge_weixin, score_consumption, score_cancel_consumption, score_withdraw, score_cancel_withdraw, score_predeposit, score_register, score_invite, score_task, score_active, score_field_1, score_field_2, score_field_3, score_field_4, score_field_5 FROM %s WHERE uid = %s;" % (UserLib._whichScoreTbl(uid), uid)
             yield m.SQ(sql)
             rs = m.fetchone()
             if rs:
@@ -208,7 +208,7 @@ class UserManager(object):
             handler.set_cache_obj(c_k, score_info, 3600)
         else:
             info('cache hit %s', c_k)
-        raise gen.Return(score_info or UserManager.getDefaultUserScoreList(uid))
+        raise gen.Return(score_info or UserLib.getDefaultUserScoreList(uid))
 
     @staticmethod
     @gen.coroutine
@@ -220,7 +220,7 @@ class UserManager(object):
         '''
         ret = 0
         try:
-            score_info = yield UserManager.getUserScoreByUid(handler, uid)
+            score_info = yield UserLib.getUserScoreByUid(handler, uid)
         except:
             error('获取用户资金信息失败！', exc_info=True)
         else:
@@ -350,38 +350,38 @@ class UserManager(object):
         if event_type not in [0, 1]:
             # 更新主表的加分类别，如果加分类别不存在则主表更新不会成功，因此出错返回
             try:
-                score_str = UserManager._SCORE_TYPE_DB_NAME[event_type][0]
+                score_str = UserLib._SCORE_TYPE_DB_NAME[event_type][0]
                 assert score_str
                 score_sql_str = ", %s = %s + %s" % (score_str, score_str, score)
             except:
                 raise gen.Return(ret)
 
-        m = handler.mysql_conn(UserManager._whichScoreDB(uid))
+        m = handler.mysql_conn(UserLib._whichScoreDB(uid))
         balance = 0
         try:
-            sql = "SELECT uid, score FROM %s WHERE uid = %%s" % UserManager._whichScoreTbl(uid)
+            sql = "SELECT uid, score FROM %s WHERE uid = %%s" % UserLib._whichScoreTbl(uid)
             yield m.SQ(sql, (uid,))
             rs = m.fetchone()
             if not rs:
                 balance = score
-                rslt = yield UserManager.checkUserByUid(handler, uid)
+                rslt = yield UserLib.checkUserByUid(handler, uid)
                 if rslt:
-                    yield m.SQ("insert into %s (uid, score) values(%%s, %%s)" % UserManager._whichScoreTbl(uid), (uid, 0))
+                    yield m.SQ("insert into %s (uid, score) values(%%s, %%s)" % UserLib._whichScoreTbl(uid), (uid, 0))
             else:
                 balance = int(rs[1]) + score
-            sql = "UPDATE %s SET score = score + %%s, update_time = now() %s WHERE uid = %%s" % (UserManager._whichScoreTbl(uid), score_sql_str)
+            sql = "UPDATE %s SET score = score + %%s, update_time = now() %s WHERE uid = %%s" % (UserLib._whichScoreTbl(uid), score_sql_str)
             yield m.SQ(sql, (score, uid))
         except:
             error('', exc_info=True)
             raise gen.Return(ret)
         else:
-            UserManager.clearScoreCache(handler, uid)
+            UserLib.clearScoreCache(handler, uid)
 
         # log
         try:
             # log表规则是取uid倒数第2位分库 最后1位分表 共100个表（包括0）
             sql = "INSERT INTO %s (uid, device_id, event_type, event_sub_type, score, balance, ctime, order_id, pay_id, os_type, remark, ip) " \
-                  " values(%%s, %%s, %%s, %%s, %%s, %%s, now(), %%s, %%s, %%s, %%s, %%s)" % UserManager._whichScoreLogTbl(uid)
+                  " values(%%s, %%s, %%s, %%s, %%s, %%s, now(), %%s, %%s, %%s, %%s, %%s)" % UserLib._whichScoreLogTbl(uid)
             args = (uid, m.F(device_id), m.F(str(event_type)), m.F(str(event_sub_type)), score, balance, m.F(str(order_id)), m.F(str(pay_id)), m.F(os_type), m.F(remark), ip)
             yield m.SQ(sql, args)
         except:
@@ -442,7 +442,7 @@ class UserManager(object):
         # 检查是否已注册
         ret = yield usc.getUidByQid(handler, reg_qid, reg_source)
         if ret:
-            ret_msg = u'%s已注册，请直接登陆' % UserManager.REG_SOURCE_DESC.get(reg_source, u'')
+            ret_msg = u'%s已注册，请直接登陆' % UserLib.REG_SOURCE_DESC.get(reg_source, u'')
         else:
             m = handler.mysql_conn()
             m_score = None
@@ -458,7 +458,7 @@ class UserManager(object):
                         m.TQ(sql, args)
                         uid = m.db.insert_id()
                         assert uid
-                        m_score = handler.mysql_conn(UserManager._whichScoreDB(uid))
+                        m_score = handler.mysql_conn(UserLib._whichScoreDB(uid))
                         if reg_source == 'mb':  # 手机号注册，昵称默认为139*****888这种（隐藏中间5位）
                             nickname = '%s*****%s' % (str(reg_qid)[:3], str(reg_qid)[-3:])
                         nickname = nickname.strip()  # 有一些用户名前后有空格或空行，处理一下
@@ -467,8 +467,8 @@ class UserManager(object):
                               "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
                         args = (uid, reg_source, reg_qid, token, ticket, nickname, gender, figure_url, figure_url_other, province, city, country, year or 0)
                         m.TQ(sql, args)
-                        info('uid: %s, score_table: %s' % (uid, UserManager._whichScoreTbl(uid)))
-                        m_score.TQ("INSERT INTO %s (uid, score, ctime, utime) VALUES(%%s, %%s, NOW(), NOW())" % UserManager._whichScoreTbl(uid), (uid, 0))
+                        info('uid: %s, score_table: %s' % (uid, UserLib._whichScoreTbl(uid)))
+                        m_score.TQ("INSERT INTO %s (uid, score, ctime, utime) VALUES(%%s, %%s, NOW(), NOW())" % UserLib._whichScoreTbl(uid), (uid, 0))
                         m.db.commit()
                         m_score.db.commit()
                     except:
@@ -491,7 +491,7 @@ class UserManager(object):
                             if int(invite_uid) > 0:
                                 RabbitMqLib().send_msg('task_queue', {'method': 'doQuest', 'args': {'questId': QuestManager.QUEST_TUZI_INVITE, 'uid': invite_uid, 'ulevel': 0}})  # 完成师徒邀请
                                 info('用户完成徒弟邀请任务. uid %s , quest_id : %s, 被邀请人uid : %s' % (invite_uid, QuestManager.QUEST_TUZI_INVITE, uid))
-                                userInfo = yield UserManager.getUserInfoByUid(handler, invite_uid)
+                                userInfo = yield UserLib.getUserInfoByUid(handler, invite_uid)
                                 if userInfo and int(userInfo['invite_uid']) > 0:
                                     RabbitMqLib().send_msg('task_queue', {'method': 'doQuest', 'args': {'questId': QuestManager.QUEST_TUSUN_INVITE, 'uid': userInfo['invite_uid'], 'ulevel': -1}})  # 完成徒孙邀请
                                     info('用户完成徒孙邀请任务. uid %s , quest_id : %s' % (userInfo['invite_uid'], QuestManager.QUEST_TUSUN_INVITE))
@@ -552,9 +552,9 @@ class UserManager(object):
         '''
         err_code, err_msg, ret_data = 0, '', None
         if 'reg_source' in user_obj and 'ticket' in user_obj:
-            err_code, err_msg, ret_data = yield UserManager.checkTicket(handler, user_obj)
+            err_code, err_msg, ret_data = yield UserLib.checkTicket(handler, user_obj)
             if ret_data:
-                user_exist = yield UserManager.checkUserByUid(handler, ret_data['uid'])
+                user_exist = yield UserLib.checkUserByUid(handler, ret_data['uid'])
                 if user_exist:
                     ret_data = ret_data['uid']
                 else:
@@ -587,7 +587,7 @@ class UserManager(object):
         if not bPassed:
             err_code, err_msg = handler.err._ERR_COUPON_ERR, sErr
         else:
-            err_code, err_msg, uid = yield UserManager.validateUser(handler, {'reg_source': '', 'ticket': ticket})
+            err_code, err_msg, uid = yield UserLib.validateUser(handler, {'reg_source': '', 'ticket': ticket})
             if uid:
                 m = handler.mysql_conn()
                 yield m.SQ("select uid from o_user_basic where reg_source='mb' and reg_qid=%s", (uid, ))
@@ -596,7 +596,7 @@ class UserManager(object):
                     info('绑定失败 手机号 %s 已经注册过 uid %s', mobile, uid)
                     err_code, err_msg = handler.err._ERR_ONE_MOBILE_ALREADY_REG, u'此手机号之前已经注册为帐号，无法进行绑定！'
                 else:
-                    uinfo = yield UserManager.getUserInfoByUid(handler, uid)
+                    uinfo = yield UserLib.getUserInfoByUid(handler, uid)
                     if uinfo:
                         if uinfo['bind_mobile'] != 0:
                             info('绑定失败 %s 已经绑定过手机号 %s', uid, uinfo['bind_mobile'])
@@ -612,7 +612,7 @@ class UserManager(object):
     def updateNickname(handler, ticket, rs, nickname):
         u'''修改昵称
         '''
-        err_code, err_msg, uid = yield UserManager.validateUser(handler, {'reg_source': rs, 'ticket': ticket})
+        err_code, err_msg, uid = yield UserLib.validateUser(handler, {'reg_source': rs, 'ticket': ticket})
         if uid:
             m = handler.mysql_conn()
             sql = "update o_user_extra set nickname='%s' where uid=%s;" % (nickname, uid)
@@ -625,15 +625,15 @@ class UserManager(object):
     @staticmethod
     @gen.coroutine
     def makeFatherChildRelation(handler, father_uid, child_uid):
-        child_info = yield UserManager.getUserInfoByUid(handler, child_uid)
+        child_info = yield UserLib.getUserInfoByUid(handler, child_uid)
         if child_info['invite_uid'] == 0:
             m = handler.mysql_conn()
             yield m.SQ('UPDATE o_user_basic SET invite_uid = %s WHERE uid = %s;', (father_uid, child_uid))
-            UserManager.clearUserInfoCache(handler, child_uid)
+            UserLib.clearUserInfoCache(handler, child_uid)
             info('使 %s 成为 %s 的师父', father_uid, child_uid)
             RabbitMqLib().send_msg('task_queue', {'method': 'doQuest', 'args': {'questId': QuestManager.QUEST_TUZI_INVITE, 'uid': father_uid, 'ulevel': 0}})  # 完成师徒邀请
             info('用户完成徒弟邀请任务. uid %s , quest_id : %s' % (father_uid, QuestManager.QUEST_TUZI_INVITE))
-            userInfo = yield UserManager.getUserInfoByUid(handler, father_uid)
+            userInfo = yield UserLib.getUserInfoByUid(handler, father_uid)
             if userInfo and userInfo['invite_uid']:
                 RabbitMqLib().send_msg('task_queue', {'method': 'doQuest', 'args': {'questId': QuestManager.QUEST_TUSUN_INVITE, 'uid': userInfo['invite_uid'], 'ulevel': -1}})  # 完成徒孙邀请
                 info('用户完成徒孙邀请任务. uid %s , quest_id : %s' % (userInfo['invite_uid'], QuestManager.QUEST_TUSUN_INVITE))
@@ -714,7 +714,7 @@ class UserManager(object):
 
         **arg**
          * ``uid``
-         * ``vip_flag`` 要判断的类型。单独的值 UserManager.USER_VIP_TYPE_NONE  或者 USER_VIP_TYPE_INVITE / USER_VIP_TYPE_BANKER 中的一个值，多个值用 | 连接
+         * ``vip_flag`` 要判断的类型。单独的值 UserLib.USER_VIP_TYPE_NONE  或者 USER_VIP_TYPE_INVITE / USER_VIP_TYPE_BANKER 中的一个值，多个值用 | 连接
 
         **return**
          * <True_or_False> 代表用户 ``uid`` 是否是 ``vip_flag`` 指定类型的一种或多种
@@ -739,7 +739,7 @@ class UserManager(object):
                 handler.set_cache(c_k, vip_level, 300)
 #-#        else:
 #-#            info('cache hit %s', c_k)
-        if vip_flag != UserManager.USER_VIP_TYPE_NONE:
+        if vip_flag != UserLib.USER_VIP_TYPE_NONE:
             raise gen.Return((int(vip_level) & vip_flag) > 0)
         else:
             raise gen.Return(int(vip_level) == 0)
@@ -754,7 +754,7 @@ if __name__ == '__main__':
 #-#        usc = handler.user_service_conn()
 #-#        r = yield usc.addScore(handler, {'uid': 10000000,
 #-#                                         'device_id': '999',
-#-#                                         'event_type': UserManager.EVENT_SCORE_REFUND,
+#-#                                         'event_type': UserLib.EVENT_SCORE_REFUND,
 #-#                                         'event_sub_type': 0,
 #-#                                         'score': 23 * 100,
 #-#                                         'order_id': '',
@@ -763,10 +763,10 @@ if __name__ == '__main__':
 #-#                                         'ip': '192.168.199.112',
 #-#                                         'os_type': '',
 #-#                                         })
-        # r = yield UserManager.checkTicket(handler, {'reg_source': None, 'ticket': sys.argv[1]})
-#-#        r = yield UserManager.getGrandparent(handler, 10080990)
-#-#        r = UserManager.clear_push_cache(handler, 10000000, 'ios')
-#-#        r = yield UserManager.addUser(handler, {'reg_qid': 13512345679,
+        # r = yield UserLib.checkTicket(handler, {'reg_source': None, 'ticket': sys.argv[1]})
+#-#        r = yield UserLib.getGrandparent(handler, 10080990)
+#-#        r = UserLib.clear_push_cache(handler, 10000000, 'ios')
+#-#        r = yield UserLib.addUser(handler, {'reg_qid': 13512345679,
 #-#                                                'token': 'test_token',
 #-#                                                'reg_source': 'mb',
 #-#                                                'invite_uid': '',
@@ -782,8 +782,8 @@ if __name__ == '__main__':
 #-#                                                'country': '',
 #-#                                                }
 #-#                                      )
-#-#        r = yield UserManager.checkUserVipLevel(handler, 1000, UserManager.USER_VIP_TYPE_INVITE | UserManager.USER_VIP_TYPE_BANKER)
-        r = yield UserManager.checkUserVipLevel(handler, 1000, UserManager.USER_VIP_TYPE_NONE)
+#-#        r = yield UserLib.checkUserVipLevel(handler, 1000, UserLib.USER_VIP_TYPE_INVITE | UserLib.USER_VIP_TYPE_BANKER)
+        r = yield UserLib.checkUserVipLevel(handler, 1000, UserLib.USER_VIP_TYPE_NONE)
         from applib.tools_lib import pcformat
         info('r: %s', pcformat(r))
 

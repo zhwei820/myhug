@@ -1,5 +1,6 @@
 import jwt
 import hug
+from decouple import config
 
 def get_new_ticket(uid, qid, rs):
     ticket = jwt.encode({'uid': uid, 'qid': qid, 'reg_source': rs}, config('token_secret_key'), algorithm='HS256')
@@ -22,10 +23,8 @@ def token_authorization(request):
 
     Checks for the Authorization header and verifies using the validate_ticket function
     """
-    token = request.get_header('AUTHORIZATION')
+    # token = request.get_header('AUTHORIZATION')
     token = request.headers.get('AUTHORIZATION', None)
-    print(token)
-    print(request.headers['AUTHORIZATION'])
     if token:
         return validate_ticket(token)
     return None

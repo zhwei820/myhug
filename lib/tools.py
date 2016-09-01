@@ -47,7 +47,7 @@ class Tools(object):
         if rs:
             return False
         else:
-            rs = r.settex(r_key, 1, interval)
+            rs = r.setex(r_key, 1, interval)
             return True
 
     def del_counting(self, key, host_name=''):
@@ -71,8 +71,9 @@ tools = Tools()
 async def fetch(url, headers = None):
     try:
         with aiohttp.ClientSession(headers=headers) as client:
-            async with client.get(url, headers=headers) as resp:
-                return await resp.text()
+            async with client.get(url) as resp:
+                res = await resp.text()
+                return res
     except Exception as e:
         return None
 

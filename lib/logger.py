@@ -35,7 +35,7 @@ logging.config.dictConfig({
             # If delay is true,
             # then file opening is deferred until the first call to emit().
             'delay': True,
-            'filename': '/data/logs/mysite.log',
+            'filename': '/data/logs/myhug.log',
             'formatter': 'verbose'
         },
         'fileError': {
@@ -46,7 +46,7 @@ logging.config.dictConfig({
             # If delay is true,
             # then file opening is deferred until the first call to emit().
             'delay': True,
-            'filename': '/data/logs/mysite.error.log',
+            'filename': '/data/logs/myhug.error.log',
             'formatter': 'verbose'
         }
     },

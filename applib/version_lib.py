@@ -19,7 +19,7 @@ class VersionLib(object):
     def get_version_id(os_type, app_version, uid_ext):
         version_list = VersionLib.get_version_list(os_type)
         for item in version_list:
-            if app_version < item['version'] and (item['rate'] == '[]' or uid_ext in json.loads(item['rate'])):
+            if VersionLib.version_compare(app_version, item['version']) < 0 and (item['rate'] == '[]' or uid_ext in json.loads(item['rate'])):
                 return item['id']
         return None
 
@@ -39,7 +39,8 @@ class VersionLib(object):
         res = m.fetch_one()
         return True if (res and res['update_is_force']) else False
 
-    def get_version(os_type, app_version, uid_ext):
+    @staticmethod
+    def get_version(os_type, app_version, uid_ext = ''):
         version_id = VersionLib.get_version_id(os_type, app_version, uid_ext)
         if version_id:
             version = VersionLib.get_version_by_id(version_id)
@@ -47,3 +48,25 @@ class VersionLib(object):
             return version
         else:
             return None
+
+    @staticmethod
+    def version_compare(version_1, version_2):
+        version_1 = VersionLib.get_version_value(version_1)
+        version_2 = VersionLib.get_version_value(version_2)
+        if version_1 and version_2 and len(version_1) == len(version_2):
+            for ii in range(len(version_1)):
+                if version_1[ii] > version_2[ii]:
+                    return 1
+                elif version_1[ii] < version_2[ii]:
+                    return -1
+            return 0
+
+    @staticmethod
+    def get_version_value(version):
+        if isinstance(version, str):
+            res = [int(x) for x in version.split('.')]
+            for ii in range(4):
+                if len(res) - 1 < ii:
+                    res.append(0)
+            return res
+        return None

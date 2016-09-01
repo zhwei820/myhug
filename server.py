@@ -3,16 +3,16 @@
 
 import hug
 import time
-import asyncio
+# import asyncio
 from gevent import monkey
 from decouple import config
 
-from endpoint import part_1, login, version
+from endpoint import part_1, login, version, sms_verify
 from endpoint.my import msg_list
 
-@hug.extend_api()
+@hug.extend_api("/api")
 def with_other_apis():
-    return [part_1, login, version, msg_list]
+    return [part_1, login, version, msg_list, sms_verify]
 
 DEBUG = config('DEBUG')
 
@@ -21,6 +21,7 @@ if not DEBUG:
     def not_found():
         return {'Nothing': 'to see'}
 
-if __name__ == '__main__':
-    monkey.patch_thread()
-    __hug__.serve()  # noqa
+# if __name__ == '__main__':
+monkey.patch_thread()
+# __hug__.serve()  # noqa
+app = hug.API(__name__).http.server()

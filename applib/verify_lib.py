@@ -1,31 +1,49 @@
 from lib.redis_cache import cache
 from lib.tools import tools, http_put
 from lib.logger import info, error
-import random
+import random, json, traceback
 from decouple import config
 
 
 class VerifyLib():
+    sms_url = {}
+    verify_sms_channel = {}
+    def _init_():
+        self.sms_url = json.loads(config('sms_url', default='http://rest.yxpopo.com/message_center/voice_verify/send'))
+        self.verify_sms_channel = json.loads(config('verify_sms_channel', default='100'))
+
     @staticmethod
-    def add_code(pnum, device_id, status, code, package_name, app_version, os_type):
+    @cache.as_cache()
+    async def async_cache_test():
+        return "test"
+
+    @staticmethod
+    def add_code_test(pnum, device_id, code, package_name, app_version, os_type):
         m = tools.mysql_conn()
         try:
             sql = "INSERT INTO o_verify_log (pnum, device_id, status, code, package_name, app_version, os_type) \
                    VALUES(%s,%s,%s,%s,%s,%s,%s)"
-            m.Q(sql, (pnum, device_id, status, code, package_name, app_version, os_type))
+            m.Q(sql, (pnum, device_id, 0, code, package_name, app_version, os_type))
             r_id = int(m.cur.lastrowid)
+            cache.invalidate(VerifyLib.get_code_by_pnum, pnum)
             return r_id
         except:
             return False
 
+
     @staticmethod
-    def save_code(self, last_id, code):
+    async def add_code(pnum, device_id, code, package_name, app_version, os_type):
         m = tools.mysql_conn()
         try:
-            sql = "UPDATE o_verify_log SET status = 1, code = %s WHERE id = %s;"
-            m.Q(sql, (int(code), int(last_id)))
-            return True
+            sql = "INSERT INTO o_verify_log (pnum, device_id, status, code, package_name, app_version, os_type) \
+                   VALUES(%s,%s,%s,%s,%s,%s,%s)"
+            m.Q(sql, (pnum, device_id, 0, code, package_name, app_version, os_type))
+            r_id = int(m.cur.lastrowid)
+            cache.invalidate(VerifyLib.get_code_by_pnum, pnum)
+            return r_id
         except:
+            info('添加错误')
+            traceback.print_exc()
             return False
 
     @staticmethod
@@ -34,16 +52,16 @@ class VerifyLib():
         m = tools.mysql_conn('r')
         m.Q("SELECT code FROM o_verify_log WHERE pnum = %s ORDER BY id DESC LIMIT 1;", (pnum, ))  # 参数绑定防止sql注入
         res = m.fetch_one()
-        return res['code'] if res and res[9] else None
+        return res['code'] if res else None
 
     @staticmethod
     def get_random_code():
         return random.randint(1000, 9999)
 
     @staticmethod
-    async def send_code(pnum, code, package_name):
+    async def send_code(pnum, code, package_name, client_ip):
         msg = '验证码：%s。为了您的帐号安全，验证码请勿转发给他人' % code
-        channel = config('verify_sms_channel', default='100').get(package_name, '100')
+        channel = VerifyLib.verify_sms_channel.get(package_name, '100')
         sign = '【红包锁屏】'
         data = json.dumps({'mno': str(pnum),  # 目标手机号
                            'channel': channel,  # 渠道号
@@ -52,7 +70,7 @@ class VerifyLib():
                            'ip': client_ip,  # 目标ip
                            'sign': sign,  # 短信签名
                            })
-        url = config('sms_url', default='http://rest.yxpopo.com/message_center/voice_verify/send').get(package_name, '100')
+        url = VerifyLib.sms_url.get(package_name, '100')
         response = await http_put(url, data=data)
         rs = None
         try:
@@ -67,3 +85,8 @@ class VerifyLib():
             return False
         else:
             return True
+
+    @staticmethod
+    def sms_verify(code, pnum):
+        _code = VerifyLib.get_code_by_pnum(pnum)
+        return _code == code

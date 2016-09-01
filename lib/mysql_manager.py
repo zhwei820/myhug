@@ -57,7 +57,6 @@ class Mysql:
     def Q(self, sql, args=None):
         return self._query(sql, args)
 
-
     def worker(self, sql_list=None, callback=None):
         rs = False
         if not sql_list:
@@ -120,10 +119,10 @@ class Mysql:
     def executemany(self, sql, args):
         u'''批量执行多sql语句
         '''
-        rslt = None
+        res = None
         try:
             self.get_conn(False)
-            rslt = self.cur.executemany(sql, args)
+            res = self.cur.executemany(sql, args)
             self.db.commit()
         except (_mysql_exceptions.DatabaseError, _mysql_exceptions.OperationalError, _mysql_exceptions.ProgrammingError) as e:
             error('got Exception when do sql:%s, (total:%d)args[:5]=%s, e:\n%s', sql, len(args), args[:5], e)
@@ -138,7 +137,7 @@ class Mysql:
             self.db.rollback()
             raise e
 
-        return rslt
+        return res
 
     def close(self):
         try:
