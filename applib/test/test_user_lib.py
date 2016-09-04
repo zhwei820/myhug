@@ -13,6 +13,7 @@ def _test_add_user():
                                                     'invite_uid': '10000000',
                                                     'reg_ip': '127.0.0.1',
                                                     'os_type': 'ios',
+                                                    'device_id': 'fake_device_id_12345678',
                                                     'app_version': '1.0.0.0',
                                                     'channel': 'test',
                                                     'package_name': 'com.test.com',
@@ -30,5 +31,5 @@ def test_add_user():
     assert _test_add_user()['code'] == 0
 
 def test_get_user_by_uid():
-    assert UserLib.get_user_info_by_uid(10000000)['uid'] == 10000000
-    assert not UserLib.get_user_info_by_uid(90000000)
+    assert loop.run_until_complete(UserLib.get_user_info_by_uid(10000000))['uid'] == 10000000
+    assert not loop.run_until_complete(UserLib.get_user_info_by_uid(90000000))

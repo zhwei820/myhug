@@ -9,16 +9,18 @@ if __name__ == '__main__':
     sys.path.append(par_dir)
 
 from lib.tools import fetch
-from lib.auth import get_new_ticket
+from applib.user_lib import UserLib
 
 
 def long_time_task(name):
-    ticket = get_new_ticket(10000000, 15310982387, 'mb')
-    print('Run task %s (%s)...' % (ticket.decode(), os.getpid()))
     loop = asyncio.get_event_loop()
-    headers = {'AUTHORIZATION': ticket.decode()}
     for x in range(0, 1000):
-        print(loop.run_until_complete(fetch('http://localhost:8000/msg_list.do?last_msg_id=-1&os_type=ios&app_version=1.1.0.0&uid=10000000&channel=share&package_name=com.test.package', headers = headers)))
+        print(loop.run_until_complete(test_func))
+
+async def test_func():
+    ticket = UserLib.get_new_ticket(10000000, 15310982387)
+    print('Run task %s (%s)...' % (ticket.decode(), os.getpid()))
+    await fetch('http://localhost:8000/msg_list.do?last_msg_id=-1&os_type=ios&app_version=1.1.0.0&uid=10000000&channel=share&package_name=com.test.package', headers = headers)
 
 if __name__=='__main__':
     print('Parent process %s.' % os.getpid())

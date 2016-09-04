@@ -1,11 +1,13 @@
 # coding=utf-8
-import jwt
+import random
 import traceback
+from itsdangerous import URLSafeTimedSerializer
+from itsdangerous import SignatureExpired
+from itsdangerous import BadSignature
 from decouple import config
 from lib.redis_cache import cache
 from lib.tools import tools, http_put
 from lib.logger import info, error
-from lib.auth import get_new_ticket
 import lib.err_code as err_code
 
 class UserLib(object):
@@ -29,6 +31,7 @@ class UserLib(object):
          * `invite_uid` 邀请uid
          * `ip` 注册ip
          * `os_type` os类型
+         * `device_id` device_id
          * `app_version` 注册来自的app版本号
          * `channel` 渠道
          * `nickname`
@@ -59,9 +62,10 @@ class UserLib(object):
         m_score = None
         r = tools.get_redis()
         try:
-            sql = "INSERT INTO o_user_basic(ctime, channel, os_type, app_version, package_name, reg_ip, invite_uid, reg_source, reg_qid, status) " \
-                  "VALUES(NOW(), %s, %s, %s, %s, %s, %s, %s, %s, 1)"
-            args = (obj['channel'], obj['os_type'], obj['app_version'], obj['package_name'], obj['reg_ip'], obj['invite_uid'], obj['reg_source'], obj['reg_qid'])
+            salt = UserLib.get_salt()
+            sql = "INSERT INTO o_user_basic(ctime, channel, os_type, app_version, package_name, reg_ip, invite_uid, reg_source, reg_qid, salt, device_id, status) " \
+                  "VALUES(NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 1)"
+            args = (obj['channel'], obj['os_type'], obj['app_version'], obj['package_name'], obj['reg_ip'], obj['invite_uid'], obj['reg_source'], obj['reg_qid'], salt, obj['device_id'])
             m.TQ(sql, args)
             uid = m.db.insert_id()
             assert uid
@@ -70,10 +74,10 @@ class UserLib(object):
                 obj['nickname'] = '%s*****%s' % (str(obj['reg_qid'])[:3], str(obj['reg_qid'])[-3:])
             obj['nickname'] = obj['nickname'].strip()  # 有一些用户名前后有空格或空行，处理一下
 
-            ticket = get_new_ticket(uid, obj['reg_qid'])
-            sql = "INSERT INTO o_user_extra(uid, reg_source, reg_qid, token, ticket, nickname, gender, figure_url, figure_url_other, province, city, country, year) " \
-                  "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-            args = (uid, obj['reg_source'], obj['reg_qid'], obj['token'], ticket, obj['nickname'], obj['gender'], obj['figure_url'], obj['figure_url_other'], obj['province'], obj['city'], obj['country'], obj['year'])
+            ticket = await UserLib.get_new_ticket(uid, obj['reg_qid'], salt)
+            sql = "INSERT INTO o_user_extra(uid, reg_source, reg_qid, token, nickname, gender, figure_url, figure_url_other, province, city, country, year) " \
+                  "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            args = (uid, obj['reg_source'], obj['reg_qid'], obj['token'], obj['nickname'], obj['gender'], obj['figure_url'], obj['figure_url_other'], obj['province'], obj['city'], obj['country'], obj['year'])
             m.TQ(sql, args)
             # info('uid: %s, score_table: %s' % (uid, UserLib._which_score_table(uid)))
             m_score.TQ("INSERT INTO %s (uid, score) VALUES(%%s, %%s)" % UserLib._which_score_table(uid), (uid, 0))
@@ -151,16 +155,46 @@ class UserLib(object):
     @staticmethod
     def _which_score_table(uid):
         return "o_user_score_%s" % str(uid)[-1]
-        # return "o_user_score_%s" % str(uid)[-2:]
 
     @staticmethod
     def _which_score_log_table(uid):
         return "o_score_log_%s" % str(uid)[-2:]
 
     @staticmethod
-    @cache.cache()
-    def get_user_info_by_uid(uid):
+    @cache.as_cache()
+    async def get_user_info_by_uid(uid):
         m = tools.mysql_conn('r')
-        sql = "SELECT a.uid, a.channel, a.invite_uid, a.reg_qid, a.bind_mobile, b.nickname, b.gender, b.figure_url, b.province, b.city, b.country, a.reg_source, a.ctime, a.os_type FROM o_user_basic a, o_user_extra b WHERE a.uid = b.uid AND a.uid = %s"
+        sql = "SELECT a.uid, a.channel, a.invite_uid, a.reg_qid, a.bind_mobile, b.nickname, b.gender, b.figure_url, b.province, b.city, b.country, a.reg_source, a.ctime, a.os_type, a.salt FROM o_user_basic a, o_user_extra b WHERE a.uid = b.uid AND a.uid = %s"
         m.Q(sql, (uid,))
         return m.fetchone()
+
+    def get_salt():
+        return ''.join(random.sample(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'], 6))
+
+
+
+    async def check_ticket(ticket, uid):
+        ret = {'data' : None, 'message': '', 'code': 0}
+        res = await UserLib.get_user_info_by_uid(uid)
+        salt = res['salt'] if res else ''
+        sig = URLSafeTimedSerializer(config('token_secret_key'), salt)
+        try:
+            res = sig.loads(ticket, max_age = 60 * 60 * 24 * 30)
+        except BadSignature:
+            ret['code'] = err_code._ERR_USER_VALIDATE_WRONG
+            ret['message'] = '为保证账户安全，请重新登录'
+            return ret  # ticket 无效
+        except SignatureExpired:
+            ret['code'] = err_code._ERR_USER_VALIDATE_WRONG
+            ret['message'] = '为保证账户安全，请重新登录'
+            return ret# ticket 过期
+        else:
+            ret['data'] = res
+            return ret
+
+    async def get_new_ticket(uid, qid, salt = ''):
+        if not salt:
+            res = await UserLib.get_user_info_by_uid(uid)
+            salt = res['salt'] if res else ''
+        ticket = URLSafeTimedSerializer(config('token_secret_key'), salt).dumps({'uid': uid, 'qid': qid})
+        return ticket

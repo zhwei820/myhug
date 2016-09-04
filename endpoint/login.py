@@ -9,12 +9,13 @@ from lib.tools import tools
 from lib.logger import info, error
 from applib.user_lib import UserLib
 
-@hug.post('/login', examples='openid=15810538008&os_type=ios&app_version=1.1.0.0&rs=mb&access_token=10000dkjdksjfkds&channel=share&package_name=com.test.package&invite_uid=10000000&gender=m')
+@hug.post('/login', examples='openid=15810538008&os_type=ios&device_id=fake_device_id_12345678&app_version=1.1.0.0&rs=mb&access_token=10000dkjdksjfkds&channel=share&package_name=com.test.package&invite_uid=10000000&gender=m')
 async def regster(request, openid: types.text,
             access_token: types.text,
             rs: types.text,
             invite_uid: fields.Int(),
             os_type: types.text,
+            device_id: types.text,
             app_version: types.text,
             channel: types.text,
             package_name: types.text,
@@ -36,6 +37,7 @@ async def regster(request, openid: types.text,
         'invite_uid': invite_uid,
         'reg_ip': ip,
         'os_type': os_type,
+        'device_id': device_id,
         'app_version': app_version,
         'channel': channel,
         'package_name': package_name,

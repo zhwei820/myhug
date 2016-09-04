@@ -3,7 +3,6 @@ from decouple import config
 from lib.redis_cache import cache
 from lib.tools import tools, http_put
 from lib.logger import info, error
-from lib.auth import get_new_ticket
 import lib.err_code as err_code
 
 class UserScoreLib(object):
