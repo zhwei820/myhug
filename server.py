@@ -7,12 +7,12 @@ import time
 from gevent import monkey
 from decouple import config
 
-from endpoint import part_1, login, version, sms_verify
+from endpoint import part_1, login, version, sms_verify, user
 from endpoint.my import msg_list
 
 @hug.extend_api("/api")
 def with_other_apis():
-    return [part_1, login, version, msg_list, sms_verify]
+    return [part_1, login, version, msg_list, sms_verify, user]
 
 DEBUG = config('DEBUG')
 

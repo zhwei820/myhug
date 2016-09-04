@@ -2,6 +2,7 @@
 import jwt
 import hug
 from decouple import config
+import lib.err_code as err_code
 from itsdangerous import URLSafeTimedSerializer
 from itsdangerous import SignatureExpired
 from itsdangerous import BadSignature
@@ -18,11 +19,11 @@ def check_ticket(ticket):
     code, message, ret = 0, '', None
     sig = URLSafeTimedSerializer(config('token_secret_key'))
     try:
-        res = sig.loads(ticket, max_age = 3600 * 24 * 60)
+        ret = sig.loads(ticket, max_age = 60 * 60 * 24 * 30)
     except BadSignature:
-        return (handler.err._ERR_USER_VALIDATE_WRONG, '为保证账户安全，请重新登录', ret)  # ticket 无效
+        return (err_code._ERR_USER_VALIDATE_WRONG, '为保证账户安全，请重新登录', ret)  # ticket 无效
     except SignatureExpired:
-        return (handler.err._ERR_USER_VALIDATE_WRONG, '为保证账户安全，请重新登录', ret)  # ticket 过期
+        return (err_code._ERR_USER_VALIDATE_WRONG, '为保证账户安全，请重新登录', ret)  # ticket 过期
     else:
         return (code, message, ret)
 
