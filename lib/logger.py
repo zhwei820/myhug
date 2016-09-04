@@ -52,11 +52,11 @@ logging.config.dictConfig({
     },
     'loggers': {
         'info': {
-            'handlers': ['fileInfo'],
+            'handlers': ['fileInfo', 'console'],
             'level': 'INFO',
         },
         'error': {
-            'handlers': ['fileError'],
+            'handlers': ['fileError', 'console'],
             'level': 'INFO',
         },
     }

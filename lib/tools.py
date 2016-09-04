@@ -34,9 +34,6 @@ class Tools(object):
             self._mysql_conn_arr[db_name] = _conn
         return _conn
 
-    def get_password(self, password):
-        return hashlib.md5(password + 'dianABCDEF12').hexdigest()
-
     def temp_cache_key(self, key):
         return "_ZHUAN_%s%s" % (self.__class__.__name__, key)
 

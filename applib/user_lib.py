@@ -70,7 +70,7 @@ class UserLib(object):
                 obj['nickname'] = '%s*****%s' % (str(obj['reg_qid'])[:3], str(obj['reg_qid'])[-3:])
             obj['nickname'] = obj['nickname'].strip()  # 有一些用户名前后有空格或空行，处理一下
 
-            ticket = get_new_ticket(uid, obj['reg_qid'], obj['reg_source'])
+            ticket = get_new_ticket(uid, obj['reg_qid'])
             sql = "INSERT INTO o_user_extra(uid, reg_source, reg_qid, token, ticket, nickname, gender, figure_url, figure_url_other, province, city, country, year) " \
                   "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
             args = (uid, obj['reg_source'], obj['reg_qid'], obj['token'], ticket, obj['nickname'], obj['gender'], obj['figure_url'], obj['figure_url_other'], obj['province'], obj['city'], obj['country'], obj['year'])

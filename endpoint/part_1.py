@@ -16,7 +16,11 @@ async def hello_world():
 
 @hug.get("/test")
 def test():
-    return 'test'
+    '''api test: doc test \r\n, test multiple line;
+
+    '''
+    # a = 1 / 0
+    return {'result': 'result'}
 
 @hug.get("/async_test")
 async def async_test():
@@ -29,11 +33,13 @@ async def async_cache_test():
 
 @hug.get('/dateadd', examples="value=2014-12-22T03:12:58&addend=63")
 async def dateadd(value: fields.DateTime(),
-            addend: fields.Int(validate=Range(min=1)),
-            unit: fields.Str(validate=OneOf(['minutes', 'days']))='days',
-            ii: fields.Integer() = 1):
-    '''获取时间相加的数值
-
+                  addend: fields.Int(validate=Range(min=1)),
+                  unit: fields.Str(validate=OneOf(['minutes', 'days']))='days',
+                  ii: fields.Integer() = 1):
+    '''获取时间相加的数值; 输入参数: value : 待修改时间，addend: 增加数量， unit:单位， ii: 测试参数;;;;
+        返回： {
+                result: "2015-02-23T03:12:58"  # 修改后的日期
+            }
     '''
     value = value or dt.datetime.utcnow()
     if unit == 'minutes':
