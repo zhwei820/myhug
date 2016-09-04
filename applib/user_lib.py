@@ -1,5 +1,5 @@
 # coding=utf-8
-import random
+import random, string
 import traceback
 from itsdangerous import URLSafeTimedSerializer
 from itsdangerous import SignatureExpired
@@ -169,9 +169,13 @@ class UserLib(object):
         return m.fetchone()
 
     def get_salt():
-        return ''.join(random.sample(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'], 6))
+        return ''.join(random.sample(list(string.ascii_letters), 6))
 
-
+    async def update_salt(uid, salt):
+        m = tools.mysql_conn()
+        sql = "UPDATE o_user_basic SET salt = %s WHERE uid = %s"
+        m.Q(sql, (salt, uid))
+        cache.invalidate(UserLib.get_user_info_by_uid, uid)
 
     async def check_ticket(ticket, uid):
         ret = {'data' : None, 'message': '', 'code': 0}
