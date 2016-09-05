@@ -52,16 +52,18 @@ class Tools(object):
         r_key = self.temp_cache_key(key)
         r.delete(r_key)
 
-    def response(self, rs = None, code = 0, message = ''):
+    def response(self, rs = None, code = 0, message = '', callback=''):
         rsp = {"code": code, "message": message}
         if not rs:
             return rsp
-        elif isinstance(rs, dict):
+        if isinstance(rs, dict):
             rsp.update(rs)
-            return rsp
         else:
             rsp['data'] = rs
+        if not callback:
             return rsp
+        else:
+            return callback + '(' + json.dumps(rsp) + ')'
 
 tools = Tools()
 

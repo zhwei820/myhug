@@ -1,7 +1,6 @@
 
 
 class LoginLib(object):
-    @gen.coroutine
     def login_weixin(self, usc, callback, post_data, reg_source, invite_uid, ip, os_type, app_version, channel, package_name):
         try:
             code = post_data.get('code', '')
@@ -17,7 +16,7 @@ class LoginLib(object):
 
         await self.login_oauth_common(usc, callback, user_info['openid'], reg_source, access_token, invite_uid, ip, os_type, app_version, channel, user_info['nickname'], ('', 'M', 'F')[user_info['sex']], user_info['headimgurl'], '', user_info['province'], user_info['city'], user_info['country'], '', package_name)
 
-    @gen.coroutine
+
     def login_qq(self, usc, callback, post_data, reg_source, invite_uid, ip, os_type, app_version, channel, package_name):
         try:
             access_token = post_data.get('access_token', '')
@@ -33,7 +32,7 @@ class LoginLib(object):
 
         await self.login_oauth_common(usc, callback, openid, reg_source, access_token, invite_uid, ip, os_type, app_version, channel, user_info['nickname'], self.get_qq_gender(user_info['gender']), user_info['figureurl'], mmysql_rw.F(json.dumps(self.get_qq_other_figure_url(user_info))), user_info['province'], user_info['city'], user_info.get('country', ''), user_info['year'], package_name)
 
-    @gen.coroutine
+
     def login_wb(self, usc, callback, post_data, reg_source, invite_uid, ip, os_type, app_version, channel, package_name):
         try:
             access_token = post_data.get('access_token', '')
@@ -49,7 +48,7 @@ class LoginLib(object):
 
         await self.login_oauth_common(usc, callback, uid, reg_source, access_token, invite_uid, ip, os_type, app_version, channel, user_info['screen_name'], self.get_wb_gender(user_info['gender']), user_info['profile_image_url'], mmysql_rw.F(json.dumps(self.get_wb_other_figure_url(user_info))), user_info['province'], user_info['city'], user_info.get('country', ''), '', package_name)
 
-    @gen.coroutine
+
     def login_oauth_common(self, usc, callback, qid, reg_source, access_token, invite_uid, ip, os_type, app_version, channel, nickname, gender, figure_url, figure_url_other, province, city, country, year, package_name):
         uid = await UserLib.getUidByQid(self, qid, reg_source)
         if not uid:  # 不存在，添加
@@ -67,7 +66,7 @@ class LoginLib(object):
             await ByproductManager.update_package_name(self, uid, package_name, os_type)  # 更新package_name
         await self.login_return_common(usc, uid, ticket, callback)
 
-    @gen.coroutine
+
     def login_return_common(self, usc, uid, ticket, callback):
         user_info = {}
         if uid:
@@ -81,7 +80,7 @@ class LoginLib(object):
         else:
             self.writeS(None, self.err._ERR_ONE_LOGIN_ERROR_, u'登录失败，请稍后再试', callback)
 
-    @gen.coroutine
+
     def add_user(self, usc, openid, access_token, reg_source, invite_uid, ip, os_type, app_version, channel, nickname, gender, figure_url, figure_url_other, province, city, country, year):
         uid, ticket, err_msg = await usc.addUser(self, {
             'reg_qid': openid,

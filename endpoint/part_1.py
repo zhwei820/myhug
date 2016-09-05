@@ -1,6 +1,7 @@
 import hug
 import datetime, asyncio
 from hug import types
+from lib.tools import tools
 from marshmallow import fields
 from marshmallow.validate import Range, OneOf
 from applib.verify_lib import VerifyLib
@@ -15,12 +16,13 @@ async def hello_world():
     return "Hello"
 
 @hug.get("/test")
-def test():
+def test(callback: types.text = ''):
     '''api test: doc test \r\n, test multiple line;
 
     '''
     # a = 1 / 0
-    return {'result': 'result'}
+    # return {'result': 'result'}
+    return tools.response('test', code=0, message="发送成功", callback=callback)
 
 @hug.get("/async_test")
 async def async_test():
