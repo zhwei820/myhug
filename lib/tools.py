@@ -15,7 +15,6 @@ import hashlib
 import datetime
 import sys
 import os
-from lib.redis_manager import Redis
 from lib.mysql_manager import Mysql
 from lib.json_encoder import CJsonEncoder
 
@@ -23,9 +22,6 @@ class Tools(object):
     def __init__(self):
         self._mysql_conn_arr = {}
         self._service_conn = None
-
-    def get_redis(self, host_name=''):
-        return Redis.get_instance(host_name)
 
     def mysql_conn(self, db_name=""):
         _conn = self._mysql_conn_arr.get(db_name)

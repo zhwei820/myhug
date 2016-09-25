@@ -4,11 +4,11 @@ import traceback
 from itsdangerous import URLSafeTimedSerializer
 from itsdangerous import SignatureExpired
 from itsdangerous import BadSignature
-from decouple import config
 from lib.redis_cache import cache
 from lib.tools import tools, http_put
 from lib.logger import info, error
 import lib.err_code as err_code
+import settings
 
 class UserLib(object):
     # reg_source 取值
@@ -181,7 +181,7 @@ class UserLib(object):
         ret = {'data' : None, 'message': '', 'code': 0}
         res = await UserLib.get_user_info_by_uid(uid)
         salt = res['salt'] if res else ''
-        sig = URLSafeTimedSerializer(config('token_secret_key'), salt)
+        sig = URLSafeTimedSerializer(settings.TOKEN_SECRET_KEY, salt)
         try:
             res = sig.loads(ticket, max_age = 60 * 60 * 24 * 30)
         except BadSignature:
@@ -200,5 +200,5 @@ class UserLib(object):
         if not salt:
             res = await UserLib.get_user_info_by_uid(uid)
             salt = res['salt'] if res else ''
-        ticket = URLSafeTimedSerializer(config('token_secret_key'), salt).dumps({'uid': uid, 'qid': qid})
+        ticket = URLSafeTimedSerializer(settings.TOKEN_SECRET_KEY, salt).dumps({'uid': uid, 'qid': qid})
         return ticket

@@ -8,22 +8,18 @@ mysql连接管理类
 @author: zh
 """
 import pymysql
-import _mysql_exceptions
 import warnings
 import traceback
 import pymysql.cursors
-from decouple import config
 import dj_database_url
 from lib.logger import info, error
 
 class Mysql:
-
     default_charset = "utf8"
 
     def __init__(self, db_name=""):
         self.db_name = db_name
         self.auto_commit = False
-
         self.db = None
         self.cur = None
 
@@ -32,7 +28,7 @@ class Mysql:
             self.auto_commit = auto_commit
             # 主库 读写
             if not self.db_name:
-                dbConf = dj_database_url.config(default = config('DATABASE_URL', default='mysql://root:spwx@localhost:3306/pinax_mysite'))
+                dbConf = dj_database_url.config(default = config('DATABASE_URL', ))
             if self.db_name:
                 dbConf = dj_database_url.config(default = config('DATABASE_URL_' + db_name, default='mysql://root:spwx@localhost:3306/pinax_mysite'))
             self.db = pymysql.Connect(host=dbConf['HOST'], user=dbConf['USER'],
@@ -124,10 +120,10 @@ class Mysql:
             self.get_conn(False)
             res = self.cur.executemany(sql, args)
             self.db.commit()
-        except (_mysql_exceptions.DatabaseError, _mysql_exceptions.OperationalError, _mysql_exceptions.ProgrammingError) as e:
-            error('got Exception when do sql:%s, (total:%d)args[:5]=%s, e:\n%s', sql, len(args), args[:5], e)
-            self.db.rollback()
-            raise e
+        # except (_mysql_exceptions.DatabaseError, _mysql_exceptions.OperationalError, _mysql_exceptions.ProgrammingError) as e:
+        #     error('got Exception when do sql:%s, (total:%d)args[:5]=%s, e:\n%s', sql, len(args), args[:5], e)
+        #     self.db.rollback()
+        #     raise e
         except StandardError as e:
             info('got StandardError and rollback when do sql:%s, (total:%d)args[:5]=%s, e:\n%s', sql, len(args), args[:5], e)
             self.db.rollback()

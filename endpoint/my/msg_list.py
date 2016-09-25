@@ -2,8 +2,6 @@
 
 import hug
 from hug import types
-from marshmallow import fields
-from falcon import HTTP_400
 from lib.tools import tools
 from applib.user_lib import UserLib
 from lib.logger import info, error
@@ -12,12 +10,12 @@ from applib.message_lib import MessageLib
 
 @hug.get('/msg_list.do', examples='last_msg_id=-1&os_type=ios&app_version=1.1.0.0&channel=share&package_name=com.test.package&uid=10000000&ticket=eyJ1aWQiOjEwMDAwMDAwLCJxaWQiOiIxNTgxMDUzODA5OCJ9.Cq3LVA.Cj-xAUb5ipibHbW89ISKcPGl56w')
 async def message_list(request,
-                 last_msg_id: fields.Int(),
+                 last_msg_id: types.number,
                  os_type: types.text,
                  app_version: types.text,
                  channel: types.text,
                  package_name: types.text = 'com.test.package',
-                 uid: fields.Int()  = -1,
+                 uid: types.number  = -1,
                  ticket: types.text = ''):
     """获取消息列表 \n\n
     """

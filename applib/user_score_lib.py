@@ -1,5 +1,4 @@
 import traceback
-from decouple import config
 from lib.redis_cache import cache
 from lib.tools import tools, http_put
 from lib.logger import info, error

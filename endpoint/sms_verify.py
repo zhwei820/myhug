@@ -2,7 +2,6 @@
 
 import hug
 from hug import types
-from falcon import HTTP_400
 import lib.err_code as err_code
 from lib.tools import tools
 from lib.logger import info, error
@@ -42,7 +41,7 @@ async def async_add_code(request, pnum: int,
     return tools.response(code=0, message="发送成功")
 
 @hug.get('/add_code.do', examples='os_type=ios&app_version=1.1.0.0&channel=share&package_name=com.test.package&pnum=1862753079&device_id=llllllfffff')
-def add_code(request, pnum: int,
+async def add_code(request, pnum: int,
              device_id: types.text,
              os_type: types.text,
              app_version: types.text,

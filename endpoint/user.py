@@ -2,8 +2,6 @@
 
 import hug
 from hug import types
-from marshmallow import fields
-from falcon import HTTP_400
 import lib.err_code as err_code
 from applib.user_lib import UserLib
 from lib.tools import tools
@@ -15,7 +13,7 @@ async def init(request,
                app_init: types.text,
                channel: types.text,
                package_name: types.text = 'com.test.package',
-               uid: fields.Int()  = -1,
+               uid: types.number  = -1,
                ticket: types.text = ''):
     """app init 接口
     """

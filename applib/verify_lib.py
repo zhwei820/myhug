@@ -2,15 +2,15 @@ from lib.redis_cache import cache
 from lib.tools import tools, http_put
 from lib.logger import info, error
 import random, json, traceback
-from decouple import config
+import settings
 
 
 class VerifyLib():
     sms_url = {}
     verify_sms_channel = {}
     def _init_():
-        self.sms_url = json.loads(config('sms_url', default='http://rest.yxpopo.com/message_center/voice_verify/send'))
-        self.verify_sms_channel = json.loads(config('verify_sms_channel', default='100'))
+        self.sms_url = settings.SMS_URL
+        self.verify_sms_channel = settings.VERIFY_SMS_CHANNEL
 
     @staticmethod
     @cache.as_cache()
