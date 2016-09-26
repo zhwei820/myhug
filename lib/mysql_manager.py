@@ -13,6 +13,7 @@ import traceback
 import pymysql.cursors
 import dj_database_url
 from lib.logger import info, error
+import settings
 
 class Mysql:
     default_charset = "utf8"
@@ -28,9 +29,9 @@ class Mysql:
             self.auto_commit = auto_commit
             # 主库 读写
             if not self.db_name:
-                dbConf = dj_database_url.config(default = config('DATABASE_URL', ))
+                dbConf = dj_database_url.config(default = settings.DATABASE_URL)
             if self.db_name:
-                dbConf = dj_database_url.config(default = config('DATABASE_URL_' + db_name, default='mysql://root:spwx@localhost:3306/pinax_mysite'))
+                dbConf = dj_database_url.config(default = _getattr_(settings, 'DATABASE_URL_%s' % db_name))
             self.db = pymysql.Connect(host=dbConf['HOST'], user=dbConf['USER'],
                                       passwd=dbConf['PASSWORD'], port=int(dbConf['PORT']),
                                       db=dbConf['NAME'], charset=self.default_charset,

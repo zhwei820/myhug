@@ -16,6 +16,8 @@ if not settings.DEBUG:
         return {'Nothing': 'to see'}
 
 if __name__ == '__main__':
-    __hug__.serve()  # noqa
+    api = __hug__.http
+    api.serve(8000)
+
 # api = hug.API(__name__)
 # app = api.http.server()

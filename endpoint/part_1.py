@@ -5,7 +5,7 @@ from lib.tools import tools
 from applib.verify_lib import VerifyLib
 
 async def hello():
-    await asyncio.sleep(5)
+    await asyncio.sleep(10)
     return "haha"
 
 @hug.get("/hello")
