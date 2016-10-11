@@ -1,10 +1,12 @@
-hug
+git+https://github.com/zhwei820/aio_hug.git
 git+https://github.com/zhwei820/dj-database-url.git
 ConcurrentLogHandler
 git+https://github.com/zhwei820/rc.git
 aiohttp
 pyjwt
-decouple
+envparse
+pymysql
+itsdangerous
 
 # dev
 pytest
