@@ -7,6 +7,7 @@ pyjwt
 envparse
 pymysql
 itsdangerous
+aiohttp_debugtoolbar
 
 # dev
 pytest

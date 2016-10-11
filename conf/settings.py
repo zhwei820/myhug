@@ -19,7 +19,6 @@ REDIS_URL = env.str('REDIS_URL', default=False)  # cluster
 # REDIS_URL_2 = env.str('REDIS_URL_2', default=False)
 # REDIS_URL_3 = env.str('REDIS_URL_3', default=False)
 
-
 REDIS_URL = env.str('REDIS_URL', default=False)  # cluster
 
 VERIFY_SMS_CHANNEL = env.json('VERIFY_SMS_CHANNEL') # help='根据包名确定推送中心的产品id'

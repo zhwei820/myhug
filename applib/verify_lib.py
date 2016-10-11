@@ -30,7 +30,6 @@ class VerifyLib():
         except:
             return False
 
-
     @staticmethod
     async def add_code(pnum, device_id, code, package_name, app_version, os_type):
         m = tools.mysql_conn()
