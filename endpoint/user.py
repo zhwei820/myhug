@@ -17,7 +17,7 @@ async def init(request,
                ticket: types.text = ''):
     """app init 接口
     """
-    code, message, ret = UserLib.check_ticket(ticket, uid)
+    code, message, ret = await UserLib.check_ticket(ticket, uid)
     if uid <= 0:
         return tools.response()
     elif uid and ret:

@@ -24,14 +24,14 @@ class Mysql:
         self.db = None
         self.cur = None
 
-    def get_conn(self, db_name='', auto_commit=True):
+    def get_conn(self, db_name=None, auto_commit=True):
         if self.db is None:
             self.auto_commit = auto_commit
             # 主库 读写
             if not self.db_name:
                 dbConf = dj_database_url.config(default = settings.DATABASE_URL)
             if self.db_name:
-                dbConf = dj_database_url.config(default = _getattr_(settings, 'DATABASE_URL_%s' % db_name))
+                dbConf = dj_database_url.config(default = getattr(settings, 'DATABASE_URL_%s' % self.db_name))
             self.db = pymysql.Connect(host=dbConf['HOST'], user=dbConf['USER'],
                                       passwd=dbConf['PASSWORD'], port=int(dbConf['PORT']),
                                       db=dbConf['NAME'], charset=self.default_charset,
