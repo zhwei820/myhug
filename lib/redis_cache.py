@@ -1,12 +1,20 @@
 import dj_database_url
-import settings
+import conf.settings as settings
 from rc import Cache, CacheCluster
 
 redis_conf = []
-redis_conf.append(dj_database_url.config(default = settings.REDIS_URL))
+redis_conf.append(dj_database_url.parse(settings.REDIS_URL))
+print(redis_conf)
+
+print(dj_database_url.parse(settings.REDIS_URL))
+print(settings.REDIS_URL)
+print()
+print()
+print()
+
 try:
     for ii in range(1, 10):
-        redis_conf.append(j_database_url.config(default = getattr(settings, 'REDIS_URL_%s') % (ii)))
+        redis_conf.append(j_database_url.parse(default = getattr(settings, 'REDIS_URL_%s') % (ii)))
 except Exception as e:
     pass
 

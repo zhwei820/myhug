@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
-import settings
+import conf.settings as settings
 import hug
 import time
 from endpoint import part_1, login, version, sms_verify, user

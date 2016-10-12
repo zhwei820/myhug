@@ -2,7 +2,7 @@ from lib.redis_cache import cache
 from lib.tools import tools, http_put
 from lib.logger import info, error
 import random, json, traceback
-import settings
+import conf.settings as settings
 
 
 class VerifyLib():

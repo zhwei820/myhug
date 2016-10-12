@@ -13,7 +13,7 @@ import traceback
 import pymysql.cursors
 import dj_database_url
 from lib.logger import info, error
-import settings
+import conf.settings as settings
 
 class Mysql:
     default_charset = "utf8"

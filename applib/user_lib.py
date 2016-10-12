@@ -8,7 +8,7 @@ from lib.redis_cache import cache
 from lib.tools import tools, http_put
 from lib.logger import info, error
 import lib.err_code as err_code
-import settings
+import conf.settings as settings
 
 class UserLib(object):
     # reg_source 取值

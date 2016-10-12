@@ -101,4 +101,3 @@ docs/_build/
 **/node_modules
 **/node_modules/*
 /media/*
-/.env
