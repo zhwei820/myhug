@@ -17,6 +17,9 @@ async def send_sms_code(request, pnum: int,
     """发送短信验证码
     每30秒发一条
     """
+    print(dir(request))
+    print(request.raw_headers)
+
     ip = request.remote_addr
     if not tools.get_counting(pnum, 30):
         return tools.response(code=1, message="访问次数过于频繁， 请30秒后重试")
