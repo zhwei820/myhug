@@ -12,7 +12,7 @@ def with_other_apis():
 
 if not settings.DEBUG:
     @hug.not_found()
-    def not_found():
+    async def not_found():
         return {'Nothing': 'to see'}
 
 if __name__ == '__main__':
