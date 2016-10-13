@@ -17,10 +17,13 @@ async def init(request,
                ticket: types.text = ''):
     """app init 接口
     """
-    code, message, ret = await UserLib.check_ticket(ticket, uid)
+    res = await UserLib.check_ticket(ticket, uid)
+    ret = res['data']
     if uid <= 0:
         return tools.response()
     elif uid and ret:
+        info(ret)
         res = await UserLib.get_new_ticket(ret['uid'], ret['qid'])
+        info(ticket)
         return tools.response([{'new_ticket': res}])
     return tools.response(code=err_code._ERR_TICKET_ERR, message="身份验证失败")
