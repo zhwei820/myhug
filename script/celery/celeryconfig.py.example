@@ -1,7 +1,7 @@
 # Celery configuration
 # http://docs.celeryproject.org/en/latest/configuration.html
 
-BROKER_URL = 'redis://'
+BROKER_URL = 'redis://192.168.199.224:6379/0'
 CELERY_RESULT_BACKEND = BROKER_URL
 
 # json serializer is more secure than the default pickle

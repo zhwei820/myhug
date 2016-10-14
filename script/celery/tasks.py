@@ -33,7 +33,6 @@ def sum_test(num):
     num = num + 1
     return num
 
-
 if __name__ == "__main__":
     r = main(sys.argv)
     print(r)
