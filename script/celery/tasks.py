@@ -28,10 +28,19 @@ def mkdir_p(path):
         if e.errno == errno.EEXIST:
             pass
 
-@app.task()
+@app.task(ignore_result=True)
 def sum_test(num):
     num = num + 1
+    do_request()
     return num
+
+import httplib2
+def do_request():
+    http = httplib2.Http()
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/51.0.2704.79 Chrome/51.0.2704.79 Safari/537.36'}
+    url = "https://www.baidu.com/"
+    response, content = http.request(url, 'GET', headers=headers)
+
 
 if __name__ == "__main__":
     r = main(sys.argv)
