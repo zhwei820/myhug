@@ -17,7 +17,7 @@ if not settings.DEBUG:
 
 if __name__ == '__main__':
     api = __hug__.http
-    api.serve(8000)
+    api.serve(8082)
 
 # api = hug.API(__name__)
 # app = api.http.server()
