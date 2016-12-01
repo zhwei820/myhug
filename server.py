@@ -10,10 +10,10 @@ from endpoint.my import msg_list
 def with_other_apis():
     return [part_1, login, version, msg_list, sms_verify, user]
 
-if not settings.DEBUG:
-    @hug.not_found()
-    async def not_found():
-        return {'Nothing': 'to see'}
+@hug.not_found()
+async def not_found():
+    return {'error': '404'}
+
 
 if __name__ == '__main__':
     api = __hug__.http
