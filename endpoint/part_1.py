@@ -7,48 +7,80 @@ from applib.verify_lib import VerifyLib
 @hug.get("/ping")
 async def ping(request):
     """
-    Description end-point
 
-    ---
-    tags:
-    -   user
-    summary: Create user
-    description: This can only be done by the logged in user.
-    operationId: examples.api.api.createUser
-    produces:
-    -   application/json
-    parameters:
-    -   in: body
-        name: body
-        description: Created user object
-        required: false
-        schema:
-        type: object
-        properties:
-            id:
-            type: integer
-            format: int64
-            username:
-            type:
-                - "string"
-                - "null"
-            firstName:
-            type: string
-            lastName:
-            type: string
-            email:
-            type: string
-            password:
-            type: string
-            phone:
-            type: string
-            userStatus:
-            type: integer
-            format: int32
-            description: User Status
-    responses:
+Description end-point
+
+---
+tags:
+  - user
+summary: Create user
+description: This can only be done by the logged in user.
+operationId: examples.api.api.createUser
+produces:
+  - application/json
+parameters:
+  - name: start_latitude
+    in: query;
+    description: 几个参数
+    required: true
+    type: number
+    format: double
+  - name: start_longitude
+    in: query
+    description: 又一个参数
+    required: true
+    type: number
+    format: double
+  - name: end_latitude
+    in: query
+    description: 几个参数
+    required: true
+    type: number
+    format: double
+  - name: end_longitude
+    in: query
+    description: 又一个
+    required: true
+    type: number
+    format: double
+responses:
     "201":
-        description: successful operation
+        description: An array of price estimates by product
+        schema:
+            type: array
+            items:
+                $ref: "#/definitions/Store"
+
+
+==============================
+
+definitions:
+  Store:
+    type: object
+    required:
+      - id
+      - name
+      - country_code 
+      - city
+    properties:
+      id:
+        type: "integer"
+        readOnly: true
+        description: Store ID
+      name:
+        type: "string"
+        description: Store name
+      country_code:
+        type: "string"
+        description: 3-letter country code (e.g. USA)
+      city:
+        type: "string"
+        description: "City where the store is located"
+  StoreList:
+    type: array
+    items: 
+      $ref: "#/definitions/Store"
+
     """
     return "pong"
 
