@@ -5,9 +5,9 @@ from lib.tools import tools
 from applib.verify_lib import VerifyLib
 
 @hug.get("/ping")
+@hug.post("/ping")
 async def ping(request):
     """
-
 Description end-point
 
 ---
