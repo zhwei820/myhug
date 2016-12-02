@@ -13,75 +13,16 @@ Description end-point
 ---
 tags:
   - user
-summary: Create user
-description: This can only be done by the logged in user.
-operationId: examples.api.api.createUser
+summary: 健康检查
+description: 健康检查
 produces:
   - application/json
-parameters:
-  - name: start_latitude
-    in: query;
-    description: 几个参数
-    required: true
-    type: number
-    format: double
-  - name: start_longitude
-    in: query
-    description: 又一个参数
-    required: true
-    type: number
-    format: double
-  - name: end_latitude
-    in: query
-    description: 几个参数
-    required: true
-    type: number
-    format: double
-  - name: end_longitude
-    in: query
-    description: 又一个
-    required: true
-    type: number
-    format: double
 responses:
     "201":
-        description: An array of price estimates by product
-        schema:
-            type: array
-            items:
-                $ref: "#/definitions/Store"
-
-
-==============================
-
-definitions:
-  Store:
-    type: object
-    required:
-      - id
-      - name
-      - country_code 
-      - city
-    properties:
-      id:
-        type: "integer"
-        readOnly: true
-        description: Store ID
-      name:
-        type: "string"
-        description: Store name
-      country_code:
-        type: "string"
-        description: 3-letter country code (e.g. USA)
-      city:
-        type: "string"
-        description: "City where the store is located"
-  StoreList:
-    type: array
-    items: 
-      $ref: "#/definitions/Store"
+        description: 检查结果
 
     """
+
     return "pong"
 
 async def hello():
@@ -89,7 +30,7 @@ async def hello():
     return "haha"
 
 @hug.get("/hello")
-async def hello_world():
+async def hello_world(callback: types.text = ''):
     """
 summary: Price Estimates
 description: |
@@ -128,16 +69,9 @@ responses:
     200:
         description: An array of price estimates by product
         schema:
-            type: array
-            items:
-                $ref: "#/definitions/Store"
+            $ref: "#/definitions/StoreList"
 
-        default:
-            description: Unexpected error
-            schema:
-                $ref: '#/definitions/Error'
-
-==============================
+============================== outputs
 
 definitions:
   Store:
@@ -168,7 +102,13 @@ definitions:
 
     """
     res = await hello()
-    return res
+    return tools.response(  {
+                            "id": 0 ,
+                            "city": "string" ,
+                            "name": "string" ,
+                            "country_code": "string" ,
+                            }, code=0, message="发送成功", callback=callback)
+
 
 @hug.get("/test")
 async def test(callback: types.text = ''):
