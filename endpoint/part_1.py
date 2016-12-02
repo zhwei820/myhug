@@ -79,16 +79,16 @@ definitions:
     properties:
       id:
         type: "integer"
-        description: Store ID
+        description: 就是一个ID啦
       name:
         type: "string"
-        description: Store name
+        description: 我也不知道是超市
       country_code:
         type: "string"
-        description: 3-letter country code (e.g. USA)
+        description: 国家
       city:
         type: "string"
-        description: "City where the store is located"
+        description: 城市
   StoreList:
     type: array
     items: 
