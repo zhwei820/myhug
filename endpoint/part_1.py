@@ -53,54 +53,87 @@ async def ping(request):
     return "pong"
 
 async def hello():
-    await asyncio.sleep(10)
+    await asyncio.sleep(0.1)
     return "haha"
 
 @hug.get("/hello")
 async def hello_world():
     """
-    Description end-point
+summary: Price Estimates
+description: |
+    Swagger 是一个规范和完整的框架，用于生成、描述、调用和可视化 RESTful 风格的 Web 服务。        
+    总体目标是使客户端和文件系统作为服务器以同样的速度来更新。文件的方法，参数和模型紧密集成到服务器端的代码，允许API来始终保持同步。
+    Swagger 让部署管理和使用功能强大的API从未如此简单。
+parameters:
+  - name: start_latitude
+    in: query;
+    description: 几个参数
+    required: true
+    type: number
+    format: double
+  - name: start_longitude
+    in: query
+    description: 又一个参数
+    required: true
+    type: number
+    format: double
+  - name: end_latitude
+    in: query
+    description: 几个参数
+    required: true
+    type: number
+    format: double
+  - name: end_longitude
+    in: query
+    description: 又一个
+    required: true
+    type: number
+    format: double
+tags:
+    - Estimates
 
-    ---
-    tags:
-    -   hello
-    summary: Create user
-    description: This can only be done by the logged in user.
-    operationId: examples.api.api.createUser
-    produces:
-    -   application/json
-    parameters:
-    -   in: body
-        name: body
-        description: Created user object
-        required: false
+responses:
+    200:
+        description: An array of price estimates by product
         schema:
-        type: object
-        properties:
-            id:
-            type: integer
-            format: int64
-            username:
-            type:
-                - "string"
-                - "null"
-            firstName:
-            type: string
-            lastName:
-            type: string
-            email:
-            type: string
-            password:
-            type: string
-            phone:
-            type: string
-            userStatus:
-            type: integer
-            format: int32
-            description: User Status
-    responses:
-    "201":
-        description: successful operation
+            type: array
+            items:
+                $ref: "#/definitions/Store"
+
+        default:
+            description: Unexpected error
+            schema:
+                $ref: '#/definitions/Error'
+
+==============================
+
+definitions:
+  Store:
+    type: object
+    required:
+      - id
+      - name
+      - country_code 
+      - city
+    properties:
+      id:
+        type: "integer"
+        readOnly: true
+        description: Store ID
+      name:
+        type: "string"
+        description: Store name
+      country_code:
+        type: "string"
+        description: 3-letter country code (e.g. USA)
+      city:
+        type: "string"
+        description: "City where the store is located"
+  StoreList:
+    type: array
+    items: 
+      $ref: "#/definitions/Store"
+
     """
     res = await hello()
     return res
