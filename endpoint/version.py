@@ -16,7 +16,7 @@ async def version(request,
                   package_name: types.text = 'com.test.package',
                   uid: types.number  = -1,
                   ticket: types.text = ''):
-    """获取版本更新信息:
+    """
     """
     if uid <= 0:
         return tools.response(VersionLib.get_version(os_type, app_version))

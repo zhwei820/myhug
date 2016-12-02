@@ -14,8 +14,7 @@ async def send_sms_code(request, pnum: int,
                         app_version: types.text,
                         channel: types.text,
                         package_name: types.text):
-    """发送短信验证码
-    每30秒发一条
+    """
     """
     print(dir(request))
     print(request.raw_headers)

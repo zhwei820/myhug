@@ -17,7 +17,7 @@ async def message_list(request,
                  package_name: types.text = 'com.test.package',
                  uid: types.number  = -1,
                  ticket: types.text = ''):
-    """获取消息列表 \n\n
+    """
     """
     if uid <= 0:
         return tools.response(MessageLib.get_msg_list(last_msg_id))

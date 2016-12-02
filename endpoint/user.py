@@ -15,7 +15,7 @@ async def init(request,
                package_name: types.text = 'com.test.package',
                uid: types.number  = -1,
                ticket: types.text = ''):
-    """app init 接口
+    """
     """
     res = await UserLib.check_ticket(ticket, uid)
     ret = res['data']
