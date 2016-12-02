@@ -5,7 +5,7 @@ from cloghandler import ConcurrentRotatingFileHandler
 
 logging.config.dictConfig({
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
             'format': "[%(levelname)1.1s%(asctime)s.%(msecs)03d|%(process)d|%(module)s.%(funcName)s:%(lineno)d] %(message)s",
