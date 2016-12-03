@@ -17,6 +17,7 @@ import sys
 import os
 from lib.mysql_manager import Mysql
 from lib.json_encoder import CJsonEncoder
+from lib.redis_cache import cache
 
 class Tools(object):
     def __init__(self):
@@ -34,17 +35,17 @@ class Tools(object):
         return "_ZHUAN_%s%s" % (self.__class__.__name__, key)
 
     def get_counting(self, key, interval, host_name=''):
-        r = self.get_redis(host_name)
+        r = cache
         r_key = self.temp_cache_key(key)
         rs = r.get(r_key)
         if rs:
             return False
         else:
-            rs = r.setex(r_key, 1, interval)
+            rs = r.set(r_key, 1, interval)
             return True
 
     def del_counting(self, key, host_name=''):
-        r = self.get_redis(host_name)
+        r = cache
         r_key = self.temp_cache_key(key)
         r.delete(r_key)
 
@@ -60,6 +61,12 @@ class Tools(object):
             return rsp
         else:
             return callback + '(' + json.dumps(rsp) + ')'
+
+    def get_real_ip(self, request):
+        peername = request.transport.get_extra_info('peername')
+        if peername is not None:
+            host, port = peername
+            return host
 
 tools = Tools()
 

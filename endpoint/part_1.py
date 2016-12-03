@@ -93,7 +93,6 @@ definitions:
     type: array
     items: 
       $ref: "#/definitions/Store"
-
     """
     res = await hello()
     return tools.response(  {

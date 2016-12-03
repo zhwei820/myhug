@@ -71,19 +71,20 @@ class VerifyLib():
                            })
         url = VerifyLib.sms_url.get(package_name, '100')
         response = await http_put(url, data=data)
-        rs = None
-        try:
-            rs = json.loads(response.body)
-        except:
-            info('json错误: pnum: %s, channel: %s, return_body: %s' % (pnum, channel, str(response.body)))
-        if not rs:
-            info('验证码发送失败. pnum: %s. rs is None', pnum)
-            return False
-        elif rs["res"] != 1:
-            info('发送验证码失败: pnum: %s, channel: %s, return_body: %s' % (pnum, channel, str(response.body)))
-            return False
-        else:
-            return True
+        if response:
+            rs = None
+            try:
+                rs = json.loads(response.body)
+            except:
+                info('json错误: pnum: %s, channel: %s, return_body: %s' % (pnum, channel, str(response.body)))
+            if not rs:
+                info('验证码发送失败. pnum: %s. rs is None', pnum)
+                return False
+            elif rs["res"] != 1:
+                info('发送验证码失败: pnum: %s, channel: %s, return_body: %s' % (pnum, channel, str(response.body)))
+                return False
+            else:
+                return True
 
     @staticmethod
     def sms_verify(code, pnum):
