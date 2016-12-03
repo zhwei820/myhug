@@ -18,19 +18,6 @@ class VerifyLib():
         return "test"
 
     @staticmethod
-    def add_code_test(pnum, device_id, code, package_name, app_version, os_type):
-        m = tools.mysql_conn()
-        try:
-            sql = "INSERT INTO o_verify_log (pnum, device_id, status, code, package_name, app_version, os_type) \
-                   VALUES(%s,%s,%s,%s,%s,%s,%s)"
-            m.Q(sql, (pnum, device_id, 0, code, package_name, app_version, os_type))
-            r_id = int(m.cur.lastrowid)
-            cache.invalidate(VerifyLib.get_code_by_pnum, pnum)
-            return r_id
-        except:
-            return False
-
-    @staticmethod
     async def add_code(pnum, device_id, code, package_name, app_version, os_type):
         m = tools.mysql_conn()
         try:

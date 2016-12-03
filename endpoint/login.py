@@ -8,8 +8,24 @@ from lib.logger import info, error
 from applib.user_lib import UserLib
 
 
-@hug.post('/login', examples='openid=15810538008&os_type=ios&device_id=fake_device_id_12345678&app_version=1.1.0.0&rs=mb&access_token=10000dkjdksjfkds&channel=share&package_name=com.test.package&invite_uid=10000000&gender=m')
-async def login():
+@hug.post('/login')  # 登录和注册
+async def login(request, openid: types.text,
+            access_token: types.text,
+            rs: types.text,
+            invite_uid: int,
+            os_type: types.text,
+            device_id: types.text,
+            app_version: types.text,
+            channel: types.text,
+            package_name: types.text,
+            nickname: types.text = '',
+            gender: types.text = '',
+            figure_url: types.text = '',
+            figure_url_other: types.text = '',
+            province: types.text = '',
+            city: types.text = '',
+            country: types.text = '',
+            year: types.text = '1900'):
     uid, err_code, err_msg = None, 0, ''
     ret = {'data' : None, 'message': '', 'code': 0}
 
